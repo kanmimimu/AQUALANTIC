@@ -1,6 +1,6 @@
 <div align="center">
 <h1>Mint Client</h1>
-<h3>A free mixin-based injection hacked-client for Minecraft using Minecraft Forge based on CrossSine B47.</h3>
+<h3>A free mixin-based injection hacked-client for Minecraft using Minecraft Forge based on CrossSine B40.</h3>
 Website: <a href="https://example.org/">soon</a><br>
 Discord: <a href="https://example.org/">soon</a><br>
 </div>
