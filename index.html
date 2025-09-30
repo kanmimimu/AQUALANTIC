@@ -1,229 +1,393 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AQUALANTIC</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #0d1117;
-      color: #e6edf3;
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-    header {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      background: linear-gradient(135deg, #1f2937, #111827);
-      animation: fadeIn 2s ease forwards;
-    }
-    header h1 {
-      font-size: 4rem;
-      margin: 0;
-      opacity: 0;
-      transform: translateY(30px);
-      animation: slideUp 1.5s ease forwards 0.5s;
-    }
-    header p {
-      font-size: 1.3rem;
-      margin: 1rem 0;
-      opacity: 0;
-      transform: translateY(30px);
-      animation: slideUp 1.5s ease forwards 1s;
-    }
-    .btn {
-      display: inline-block;
-      margin-top: 1.5rem;
-      padding: 0.8rem 2rem;
-      background: #2563eb;
-      color: #fff;
-      font-weight: bold;
-      border-radius: 10px;
-      text-decoration: none;
-      transition: 0.3s;
-      box-shadow: 0 0 10px rgba(37,99,235,0.6);
-    }
-    .btn:hover {
-      background: #1e40af;
-      box-shadow: 0 0 20px rgba(37,99,235,1);
-    }
-    section {
-      padding: 4rem 2rem;
-      max-width: 1100px;
-      margin: auto;
-      opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 1s ease, transform 1s ease;
-    }
-    section.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .features, .plans, .reviews, .team {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-      text-align: center;
-    }
-    .feature, .plan, .review, .member {
-      background: #161b22;
-      padding: 2rem;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-      transition: transform 0.3s, background 0.3s;
-    }
-    .feature:hover, .plan:hover, .review:hover, .member:hover {
-      transform: translateY(-8px);
-      background: #1e2633;
-    }
-    .screenshots img {
-      max-width: 100%;
-      border-radius: 15px;
-      margin-bottom: 1rem;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    }
-    .stars {
-      color: #facc15;
-      margin-bottom: 0.5rem;
-    }
-    .plan .btn {
-      margin-top: 1rem;
-    }
-    .soon {
-      pointer-events: none;
-      opacity: 0.6;
-    }
-    .version {
-      color: #999;
-      font-size: 0.9rem;
-    }
-    .price {
-      font-weight: bold;
-      margin-top: 0.5rem;
-    }
-    footer {
-      background: #111827;
-      text-align: center;
-      padding: 2rem;
-      font-size: 0.9rem;
-    }
-    @keyframes fadeIn {
-      from {opacity: 0;}
-      to {opacity: 1;}
-    }
-    @keyframes slideUp {
-      from {opacity: 0; transform: translateY(30px);}
-      to {opacity: 1; transform: translateY(0);}
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQUALANTIC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        @keyframes liquid-glass-shine {
+          0% {
+            background-position: -200% 0;
+          }
+          100% {
+            background-position: 200% 0;
+          }
+        }
+
+        :root {
+            --background: #0a192f;
+            --text: #ccd6f6;
+            --primary: #2563eb;
+            --secondary: #8892b0;
+            --glow: rgba(37, 99, 235, 0.15);
+            --card-bg: #112240;
+            --card-bg-transparent: rgba(17, 34, 64, 0.8);
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero h1 {
+            font-size: 8rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -5px;
+            line-height: 1;
+            background: linear-gradient(180deg, #fff, var(--text));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: slide-in 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            margin: 1rem 0 2rem 0;
+            animation: slide-in 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+            opacity: 0;
+        }
+
+        /* --- Global Button Styles --- */
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            border: 1px solid var(--primary);
+            background-color: transparent;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+
+        /* --- Hero-specific Button Animation --- */
+        .hero .btn {
+            animation: slide-in 1s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+            opacity: 0;
+        }
+
+        main {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .section {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            margin-bottom: 6rem;
+        }
+
+        .section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            font-size: 3rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 4rem;
+            color: #fff;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg-transparent);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(29, 59, 97, 0.5);
+            padding: 2rem;
+            border-radius: 12px;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            /* LiquidGlassの光沢アニメーション */
+            background-image: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+            background-size: 200% 100%;
+            background-position: -100% 0; /* 初期位置 */
+        }
+
+        .card h3 {
+            margin-top: 0;
+            position: relative; z-index: 2;
+        }
+        .card p, .card .version, .card .price, .card .btn, .card .stars, .card small, .card img {
+            position: relative; z-index: 2;
+        }
+
+        .section#features .card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .section#features .card h3 {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        .card .version {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .card .price {
+            color: var(--secondary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0.5rem 0 1.5rem 0;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            left: var(--mouse-x, -500px);
+            top: var(--mouse-y, -500px);
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle at center, rgba(37, 99, 235, 0.1) 0%, transparent 60%);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 3;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(37, 99, 235, 0.5);
+            border-color: var(--primary);
+            background-position: 100% 0; /* ホバー時に光沢が流れる */
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 40%;
+            height: 100%;
+            background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
+            transform: skewX(-25deg) translateX(-250%);
+            transition: transform 0.85s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 4;
+        }
+
+        .card:hover::after {
+            transform: skewX(-25deg) translateX(250%);
+        }
+
+        .card.soon .btn {
+            pointer-events: none;
+            opacity: 0.6;
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+        .card.soon .btn:hover {
+            background-color: transparent;
+        }
+
+        .media-grid img {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid #1d3b61;
+        }
+        
+        .review-card .stars {
+            color: #f59e0b;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid #1d3b61;
+            color: var(--secondary);
+        }
+
+        footer a {
+            color: var(--secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: var(--primary);
+        }
+
+        /* Keyframes */
+        @keyframes slide-in {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+    </style>
 </head>
 <body>
-  <header>
-    <h1>AQUALANTIC</h1>
-    <p>The ultimate Minecraft mod to enhance your gameplay.</p>
-    <a href="https://github.com/kanmimimu/AQUALANTIC" class="btn">Source Code</a>
-  </header>
 
-  <section id="plans">
-    <h2>Plans</h2>
-    <div class="plans">
-      <div class="plan soon">
-        <h3>AQUALANTIC MCP</h3>
-        <p>Better Optimization and Bypass.</p>
-        <div class="version">1.8.9 or 1.2X(not decided yet)</div>
-        <div class="price">$80</div>
-        <a class="btn">Soon</a>
-      </div>
-      <div class="plan">
-        <h3>AQUALANTIC FML</h3>
-        <p>Good Bypass and Render.</p>
-        <div class="version">1.8.9</div>
-        <div class="price">Free</div>
-        <a href="https://github.com/kanmimimu/AQUALANTIC/releases/latest" class="btn">Download</a>
-      </div>
-      <div class="plan soon">
-        <h3>AQUALANTIC Lite</h3>
-        <p>Undetectable Ghost Client.</p>
-        <div class="version">1.8.9/Latest Fabric</div>
-        <div class="price">$150</div>
-        <a class="btn">Soon</a>
-      </div>
+    <div class="hero">
+        <h1>AQUALANTIC</h1>
+        <p>The ultimate Minecraft mod to enhance your gameplay.</p>
+        <div>
+            <a href="https://github.com/kanmimimu/AQUALANTIC/releases/latest" class="btn">Download Now</a>
+        </div>
     </div>
-  </section>
 
-  <section id="features">
-    <h2>Features</h2>
-    <div class="features">
-      <div class="feature">⚡ Good Bypasses</div>
-      <div class="feature">🤗 Active Development</div>
-      <div class="feature">🛡️ Safe & Secure</div>
-    </div>
-  </section>
+    <main>
+        <section class="section" id="plans">
+            <h2 class="section-title">Plans</h2>
+            <div class="grid">
+                 <div class="card soon">
+                    <h3>AQUALANTIC MCP</h3>
+                    <p>Better Optimization and Bypass.</p>
+                    <div class="version">1.8.9 or 1.2X (TBD)</div>
+                    <div class="price">$80</div>
+                    <a class="btn">Soon</a>
+                </div>
+                <div class="card">
+                    <h3>AQUALANTIC FML</h3>
+                    <p>Good Bypass and Render.</p>
+                    <div class="version">1.8.9</div>
+                    <div class="price">Free</div>
+                    <a href="https://github.com/kanmimimu/AQUALANTIC/releases/latest" class="btn">Download</a>
+                </div>
+                <div class="card soon">
+                    <h3>AQUALANTIC Lite</h3>
+                    <p>Undetectable Ghost Client.</p>
+                    <div class="version">1.8.9 / Latest Fabric</div>
+                    <div class="price">$150</div>
+                    <a class="btn">Soon</a>
+                </div>
+            </div>
+        </section>
 
-  <section id="Media">
-    <h2>Media</h2>
-    <div class="Media">
-      <img src="https://via.placeholder.com/800x400.png?text=Screenshot+1" alt="screenshot 1">
-      <img src="https://via.placeholder.com/800x400.png?text=Screenshot+2" alt="screenshot 2">
-    </div>
-  </section>
+        <section class="section" id="features">
+            <h2 class="section-title">Features</h2>
+            <div class="grid">
+                <div class="card"><h3>⚡ Good Bypasses</h3></div>
+                <div class="card"><h3>🤗 Active Development</h3></div>
+                <div class="card"><h3>🛡️ Safe & Secure</h3></div>
+            </div>
+        </section>
 
-  <section id="reviews">
-    <h2>User Reviews</h2>
-    <div class="reviews">
-      <div class="review">
-        <div class="stars">★★★★★</div>
-        <p>“TargetHUDあるのいいね”</p>
-        <small>- Anonymous1022</small>
-      </div>
-      <div class="review">
-        <div class="stars">★☆☆☆☆</div>
-        <p>“LiquidのHUD Editor嫌い”</p>
-        <small>- Anonymous5013</small>
-      </div>
-      <div class="review">
-        <div class="stars">★★★★★</div>
-        <p>“中身めっちゃCrossSineやん”</p>
-        <small>- Anonymous1022_5013</small>
-      </div>
-    </div>
-  </section>
-  
-  <section id="team">
-    <h2>Developer</h2>
-    <div class="team">
-      <div class="member">
-        <img src="https://via.placeholder.com/100" alt="Vive-Coder">
-        <h3>hmm-kanmimimu</h3>
-        <p>Main Developer</p>
-      </div>
-    </div>
-  </section>
+        <section class="section" id="media">
+            <h2 class="section-title">Media</h2>
+            <div class="grid media-grid">
+                <img src="resource/mmclogo.svg" alt="MMC Logo">
+                <img src="https://via.placeholder.com/800x450.png?text=Screenshot+2" alt="Screenshot 2">
+            </div>
+        </section>
 
-  <footer>
-    <p>&copy; 2025 aqualantic.com. All rights reserved.</p>
-	<p><a href="mailto:kanmimimudayo@proton.me">Contact Us</a></p>
-  </footer>
+        <section class="section" id="reviews">
+            <h2 class="section-title">User Reviews</h2>
+            <div class="grid">
+                <div class="card review-card">
+                    <div class="stars">★★★★★</div>
+                    <p>“TargetHUDあるのいいね”</p>
+                    <small>- Anonymous1022</small>
+                </div>
+                <div class="card review-card">
+                    <div class="stars">★☆☆☆☆</div>
+                    <p>“LiquidのHUD Editor嫌い”</p>
+                    <small>- Anonymous5013</small>
+                </div>
+                <div class="card review-card">
+                    <div class="stars">★★★★★</div>
+                    <p>“中身めっちゃCrossSineやん”</p>
+                    <small>- Anonymous1022_5013</small>
+                </div>
+            </div>
+        </section>
 
-  <script>
-    const sections = document.querySelectorAll('section');
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, { threshold: 0.1 });
+        <section class="section" id="team">
+            <h2 class="section-title">Developer</h2>
+            <div class="grid" style="max-width: 340px; margin: auto;">
+                <div class="card">
+                    <img src="https://via.placeholder.com/150" alt="Developer" style="border-radius: 50%; margin-bottom: 1rem; border: 2px solid var(--primary);">
+                    <h3>hmm-kanmimimu</h3>
+                    <p style="color: var(--secondary); margin: 0;">Main Developer</p>
+                </div>
+            </div>
+        </section>
 
-    sections.forEach(section => {
-      observer.observe(section);
-    });
-  </script>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 aqualantic.com. All rights reserved.</p>
+        <p>
+            <a href="mailto:contact@aqualantic.com">Contact Us</a>
+            <span style="margin: 0 10px;">|</span>
+            <a href="tos.html">Terms of Service</a>
+        </p>
+    </footer>
+
+    <script>
+        // Section reveal on scroll
+        const sections = document.querySelectorAll('.section');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+
+        // Card mouse glow effect
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+
+    </script>
+
 </body>
 </html>
