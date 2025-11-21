@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "AQUALANTIC",
+    "name": "GoodGamingChair",
+    "description": "Minecraft 1.8 Utility mod",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "AQUALANTIC.com",
+    "updateUrl": "",
+    "authorList": ["hmm-kanmimimu"],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]

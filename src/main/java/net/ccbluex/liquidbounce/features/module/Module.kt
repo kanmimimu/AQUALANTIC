@@ -1,0 +1,162 @@
+package net.ccbluex.liquidbounce.features.module
+
+import net.ccbluex.liquidbounce.CrossSine
+import net.ccbluex.liquidbounce.event.Listenable
+import net.ccbluex.liquidbounce.event.ModuleToggleEvent
+import net.ccbluex.liquidbounce.features.value.Value
+import net.ccbluex.liquidbounce.ui.client.hud.element.elements.Notification
+import net.ccbluex.liquidbounce.ui.client.hud.element.elements.NotifyType
+import net.ccbluex.liquidbounce.utils.ClassUtils
+import net.ccbluex.liquidbounce.utils.ClientUtils
+import net.ccbluex.liquidbounce.utils.MinecraftInstance
+import org.lwjgl.input.Keyboard
+
+open class Module : MinecraftInstance(), Listenable {
+    // Module information
+    var name: String
+    var update: Boolean = false
+    var localizedName = ""
+        get() = field.ifEmpty { name }
+    var category: ModuleCategory
+    var keyBind = Keyboard.CHAR_NONE
+        set(keyBind) {
+            field = keyBind
+
+            if (!CrossSine.isStarting) {
+                CrossSine.configManager.smartSave()
+            }
+        }
+    var array = true
+        set(array) {
+            field = array
+
+            if (!CrossSine.isStarting) {
+                CrossSine.configManager.smartSave()
+            }
+        }
+    val canEnable: Boolean
+    var autoDisable: EnumAutoDisableType
+    var triggerType: EnumTriggerType
+    val moduleCommand: Boolean
+    val moduleInfo = javaClass.getAnnotation(ModuleInfo::class.java)!!
+    var slideStep = 0F
+    var module: String? = null
+    var boolean1 = false
+    var boolean2 = false
+
+
+    init {
+        name = moduleInfo.name
+        category = moduleInfo.category
+        keyBind = moduleInfo.keyBind
+        array = moduleInfo.array
+        canEnable = moduleInfo.canEnable
+        autoDisable = moduleInfo.autoDisable
+        moduleCommand = moduleInfo.moduleCommand
+        triggerType = moduleInfo.triggerType
+        module = moduleInfo.module
+        boolean1 = moduleInfo.boolean1
+        boolean2 = moduleInfo.boolean2
+    }
+
+    open fun onLoad() {
+        localizedName = name
+    }
+
+    // Current state of module
+    var state = false
+        set(value) {
+            if (field == value) return
+
+            // Call toggle
+            onToggle(value)
+
+            // Play sound and add notification
+            if (!CrossSine.isStarting && moduleInfo.array) {
+                if (value) {
+                    CrossSine.hud.addNotification(Notification("Module", "Enabled $localizedName", NotifyType.SUCCESS))
+                } else {
+                    CrossSine.hud.addNotification(Notification("Module", "Disable $localizedName", NotifyType.ERROR))
+                }
+            }
+
+            // Call on enabled or disabled
+            try {
+                field = canEnable && value
+                if (value) {
+                    onEnable()
+                } else {
+                    onDisable()
+                }
+            } catch (e: Throwable) {
+                e.printStackTrace()
+            }
+
+            // Save module state
+            CrossSine.configManager.smartSave()
+
+            CrossSine.eventManager.callEvent(ModuleToggleEvent(this))
+        }
+
+    // HUD
+    val hue = Math.random().toFloat()
+    var slide = 0f
+    var arrayY = 0F
+
+    // Tag
+    open val tag: String?
+        get() = null
+
+    /**
+     * Toggle module
+     */
+    fun toggle() {
+        state = !state
+    }
+
+    /**
+     * Print [msg] to chat as alert
+     */
+    protected fun alert(msg: String) = ClientUtils.displayAlert(msg)
+
+    /**
+     * Print [msg] to chat as plain text
+     */
+    protected fun chat(msg: String) = ClientUtils.displayChatMessage(msg)
+
+    /**
+     * Called when module toggled
+     */
+    open fun onToggle(state: Boolean) {}
+
+    /**
+     * Called when module enabled
+     */
+    open fun onEnable() {}
+
+    /**
+     * Called when module disabled
+     */
+    open fun onDisable() {}
+
+    /**
+     * Called when module initialized
+     */
+    open fun onInitialize() {}
+
+    /**
+     * Get all values of module
+     */
+    open val values: List<Value<*>>
+        get() = ClassUtils.getValues(this.javaClass, this)
+
+    /**
+     * Get module by [valueName]
+     */
+    open fun getValue(valueName: String) = values.find { it.name.equals(valueName, ignoreCase = true) }
+
+    /**
+     * Events should be handled when module is enabled
+     */
+    override fun handleEvents() = state
+}
