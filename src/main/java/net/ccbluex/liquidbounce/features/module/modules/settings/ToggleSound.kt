@@ -11,7 +11,7 @@ import net.minecraft.client.audio.PositionedSoundRecord
 import net.minecraft.util.ResourceLocation
 
 @ModuleInfo(name = "ToggleSound", category = ModuleCategory.SETTING)
-class ToggleSound : Module() {
+class ToggleSound : Module() {//TODO 早く完成させないと地球滅亡する
 
     private val soundType = ListValue("SoundType", arrayOf("Epic", "QuickMacro"), "Epic")
 

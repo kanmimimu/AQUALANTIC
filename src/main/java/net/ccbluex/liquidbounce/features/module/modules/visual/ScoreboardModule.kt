@@ -24,7 +24,7 @@ object ScoreboardModule : Module() {
     @JvmField
     val changedDomain = BoolValue("Changed-Domain", false)
     @JvmField
-    val roundMode = BoolValue("RoundedMode", true)
+    val roundMode = BoolValue("RoundedMode", true)//TODO MICA FOR EVERYONE!
 
     @JvmField
     var draging = false
