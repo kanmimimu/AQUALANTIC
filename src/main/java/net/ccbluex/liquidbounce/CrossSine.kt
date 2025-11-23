@@ -38,7 +38,7 @@ object CrossSine {
     const val CLIENT_VERSION = "5 Dev"//バージョン
     var destruced = false
 
-    const val CLIENT_LOADING = "Inject VAPE V4"
+    const val CLIENT_LOADING = "Loading(1/7)"
 
     @JvmField
     val CLIENT_TITLE = "$CLIENT_NAME B$CLIENT_VERSION" + if (CLIENT_STATUS) " (Beta)" else ""
@@ -77,7 +77,7 @@ object CrossSine {
     fun initClient() {
         ClientUtils.logInfo("Loading $CLIENT_NAME $CLIENT_VERSION, by $CLIENT_CREATOR")
         ClientUtils.logInfo("Initialzing...")
-        Display.setTitle("Raven XD 3.1-Final OldGrizzly Full Disabler Edition")
+        Display.setTitle("Loading(2/7)")
         val startTime = System.currentTimeMillis()
         // Create file manager
         fileManager = FileManager()
@@ -87,7 +87,7 @@ object CrossSine {
         eventManager = EventManager()
 
         // Register listeners
-        Display.setTitle("FDPCLIENT b14")
+        Display.setTitle("Loading(3/7)")
         eventManager.registerListener(RotationUtils())
         eventManager.registerListener(ClientSpoof())
         eventManager.registerListener(InventoryUtils)
@@ -99,7 +99,7 @@ object CrossSine {
         commandManager = CommandManager()
 
         clientRPC = CrossSineRPC
-        Display.setTitle("LiquidBounce B1000000000")
+        Display.setTitle("Loading(4/7)")
         fileManager.loadConfigs(
             fileManager.accountsConfig,
             fileManager.friendsConfig,
@@ -108,14 +108,14 @@ object CrossSine {
             fileManager.subscriptsConfig
         )
         // Load client fonts
-        Display.setTitle("Rise 6.6.6")
+        Display.setTitle("Loading(5/7)")
         Fonts.loadFonts()
 
         macroManager = MacroManager()
         eventManager.registerListener(macroManager)
 
         // Setup module manager and register modules
-        Display.setTitle("ROC>PRC")
+        Display.setTitle("Loading(6/7)")
         moduleManager = ModuleManager()
         moduleManager.registerModules()
 
@@ -170,7 +170,7 @@ object CrossSine {
 
 
         ClientUtils.logInfo("Loading Script Subscripts...")
-        Display.setTitle("XinXin SilenceFix-40.88 Welcome User 免费获取请用浏览器搜索heshuyou.xyz")
+        Display.setTitle("Loading(7/7)")
         try {
 
             // ScriptManager
