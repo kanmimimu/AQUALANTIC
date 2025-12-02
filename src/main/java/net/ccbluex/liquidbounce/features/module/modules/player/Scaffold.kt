@@ -5,6 +5,19 @@ import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.ModuleInfo
 import net.ccbluex.liquidbounce.features.module.modules.movement.Speed
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.PlaceRotation
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldRotationManager
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldTowerHelper
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.DEFAULT_ROTATION_PITCH
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.GODBRIGE_ALT_ROTATION_PITCH
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.GODBRIGE_ROTATION_PITCH
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.JUMP_MOTION
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.JUMP_MOTION_ALT
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.YAW_STEP_135
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.YAW_STEP_45
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.YAW_WRAP_ANGLE
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.ZITTER_DELAY_MS
 import net.ccbluex.liquidbounce.features.value.BoolValue
 import net.ccbluex.liquidbounce.features.value.FloatValue
 import net.ccbluex.liquidbounce.features.value.IntegerValue
@@ -171,7 +184,6 @@ object Scaffold : Module() {
 
     // Rotation lock
     private var lockRotation: Rotation? = null
-    private var spinYaw = 0f
 
 
     //PrevItem
@@ -224,7 +236,7 @@ object Scaffold : Module() {
         get() {
             val player = mc.thePlayer ?: return false
 
-            val yaw = round(abs(MathHelper.wrapAngleTo180_float(player.rotationYaw)).roundToInt() / 45f) * 45f
+            val yaw = round(abs(MathHelper.wrapAngleTo180_float(player.rotationYaw)).roundToInt() / YAW_STEP_45) * YAW_STEP_45
 
             return floatArrayOf(
                 45f,
@@ -243,7 +255,8 @@ object Scaffold : Module() {
     override fun onEnable() {
         started = false
         prevTowered = false
-        spinYaw = 0f
+        ScaffoldRotationManager.resetSpinYaw()
+        ScaffoldTowerHelper.resetTowerTick()
         if (mc.thePlayer.onGround) {
             y = mc.thePlayer.posY.toInt()
         }
@@ -336,7 +349,7 @@ object Scaffold : Module() {
                             if (watchdogBoostValue.get()) {
                                 if (!Speed.state) {
                                     MovementUtils.setMotion(getSpeed().toDouble())
-                                    mc.thePlayer.motionY = 0.4191
+                                    mc.thePlayer.motionY = JUMP_MOTION_ALT
                                 }
                             } else {
                                 MovementUtils.jump(true)
@@ -423,7 +436,7 @@ object Scaffold : Module() {
                     false
                 if (!GameSettings.isKeyDown(mc.gameSettings.keyBindLeft)) mc.gameSettings.keyBindLeft.pressed =
                     false
-                if (zitterTimer.hasTimePassed(100)) {
+                if (zitterTimer.hasTimePassed(ZITTER_DELAY_MS)) {
                     zitterDirection = !zitterDirection
                     zitterTimer.reset()
                 }
@@ -551,42 +564,20 @@ object Scaffold : Module() {
     }
 
     private fun rotationStatic() {
-        var rotation: Rotation? = null
-        val pitch = if (lockRotation == null) 85F else lockRotation!!.pitch
-        when (rotationsValue.get().lowercase()) {
-            "stabilized" -> rotation =
-                Rotation(if (lockRotation == null) MovementUtils.movingYaw + 180 else lockRotation!!.yaw, pitch)
-
-            "watchdog" -> rotation = Rotation(
-                if (watchDogDelay.get() > PlayerUtils.offGroundTicks && (!towerStatus && (!watchdogBoostValue.get() || !GameSettings.isKeyDown(mc.gameSettings.keyBindUseItem))) && bridgeMode.equals("WatchDog") && watchdogTellyValue.get()) MovementUtils.movingYaw else if (lockRotation != null) lockRotation!!.yaw else MovementUtils.movingYaw - 180,
-                pitch
-            )
-            "watchdog2" -> {
-                val currentYaw = MovementUtils.movingYaw
-                val yawDiffTo180 = currentYaw - 180.0F
-                val diagonalYaw = if (isDiagonal(currentYaw)) {
-                    yawDiffTo180
-                } else {
-                    currentYaw - 135.0F * (if ((currentYaw + 180.0F) % 90.0F < 45.0F) 1.0F else -1.0F)
-                }
-                rotation = Rotation(
-                    if (lockRotation != null) lockRotation!!.yaw else diagonalYaw,
-                    pitch
-                )
-            }
-            "telly" -> {
-                val rotationYaw = if (prevTowered) if (lockRotation == null) MovementUtils.movingYaw - 180 else lockRotation!!.yaw else if (!shouldPlace()) MovementUtils.movingYaw else if (lockRotation == null) MovementUtils.movingYaw - 180 else lockRotation!!.yaw
-                rotation = Rotation(rotationYaw, if (lockRotation == null) 85F else lockRotation!!.pitch)
-            }
-            "godbridge" -> rotation = if (lockRotation != null) lockRotation else Rotation(if (isLookingDiagonally) MovementUtils.movingYaw - 180 else MovementUtils.movingYaw - 135F, 75F)
-            "spin" -> {
-                spinYaw += 45F
-                if (spinYaw > 180F) {
-                    spinYaw -= 360F
-                }
-                rotation = Rotation(spinYaw, pitch)
-            }
-        }
+        val rotation = ScaffoldRotationManager.calculateRotationForMode(
+            rotationsValue.get(),
+            null,
+            lockRotation,
+            bridgeMode.get(),
+            isLookingDiagonally,
+            towerStatus,
+            watchdogTellyValue.get(),
+            watchDogDelay.get(),
+            watchdogBoostValue.get(),
+            GameSettings.isKeyDown(mc.gameSettings.keyBindUseItem),
+            prevTowered,
+            shouldPlace()
+        )
         if (rotation != null) {
             RotationUtils.setTargetRotationReverse(
                 RotationUtils.limitAngleChange(
@@ -647,90 +638,7 @@ object Scaffold : Module() {
     }
 
     private fun doTowerMove(mode: String) {
-        when (mode) {
-            "ncp" -> {
-                MovementUtils.strafe()
-                if (mc.thePlayer.posY % 1 <= 0.00153598) {
-                    mc.thePlayer.setPosition(
-                        mc.thePlayer.posX,
-                        floor(mc.thePlayer.posY),
-                        mc.thePlayer.posZ
-                    )
-                    mc.thePlayer.motionY = 0.42
-                } else if (mc.thePlayer.posY % 1 < 0.1 && PlayerUtils.offGroundTicks != 0) {
-                    mc.thePlayer.setPosition(
-                        mc.thePlayer.posX,
-                        floor(mc.thePlayer.posY),
-                        mc.thePlayer.posZ
-                    )
-                }
-            }
-            "blocksmc" -> {
-                MovementUtils.strafe()
-                if (mc.thePlayer.onGround) {
-                    mc.thePlayer.motionY = 0.42
-                }
-            }
-            "vanilla" -> {
-                mc.thePlayer.motionY = 0.42
-            }
-            "lowhop" -> {
-                MovementUtils.strafe()
-                if (mc.thePlayer.onGround) {
-                    mc.thePlayer.motionY = 0.4
-                }
-            }
-            "fastjump" -> {
-                MovementUtils.strafe()
-                if (mc.thePlayer.motionY < 0) {
-                    mc.thePlayer.motionY = 0.42
-                    if (mc.thePlayer.isPotionActive(Potion.jump)) {
-                        mc.thePlayer.motionY += ((mc.thePlayer.getActivePotionEffect(Potion.jump).amplifier + 1) * 0.1f).toDouble()
-                    }
-                }
-            }
-            "aac" -> {
-                MovementUtils.strafe()
-                if (mc.thePlayer.posY % 1 <= 0.005) {
-                    mc.thePlayer.setPosition(
-                            mc.thePlayer.posX,
-                            floor(mc.thePlayer.posY),
-                            mc.thePlayer.posZ
-                    )
-                    mc.thePlayer.motionY = 0.41998
-                }
-            }
-            "extra" -> {
-                val yState = (mc.thePlayer.posY % 1.0 * 100.0).toInt()
-                when (towerTick) {
-                    0 -> {
-                        if (mc.thePlayer.onGround) {
-                            towerTick = 1
-                            mc.thePlayer.motionY = -0.0784000015258789
-                        }
-                    }
-                    1 -> {
-                        if (yState == 0 && isReplaceable(BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1.0, mc.thePlayer.posZ))) {
-                            towerTick = 2
-                            mc.thePlayer.motionY = 0.42
-                        } else {
-                            towerTick = 0
-                        }
-                    }
-                    2 -> {
-                        towerTick = 3
-                        mc.thePlayer.motionY -= RandomUtils.nextDouble(0.00101, 0.00109)
-                    }
-                    3 -> {
-                        towerTick = 1
-                        mc.thePlayer.motionY = 1.0 - mc.thePlayer.posY % 1.0
-                    }
-                    else -> {
-                        towerTick = 0
-                    }
-                }
-            }
-        }
+        ScaffoldTowerHelper.doTowerMove(mode, mc)
     }
 
     private fun move() {
@@ -1009,7 +917,7 @@ object Scaffold : Module() {
             if (!BlockUtils.canBeClicked(neighbor)) continue
 
             val dirVec = Vec3(side.directionVec)
-            for (offset in generateOffsets()) {
+            for (offset in ScaffoldRotationManager.generateOffsets()) {
                 val posVec = Vec3(blockPos).add(offset)
                 if (posVec in checkedPositions) continue // ข้ามตำแหน่งที่ตรวจสอบแล้ว
                 checkedPositions.add(posVec)
@@ -1021,8 +929,8 @@ object Scaffold : Module() {
                             mc.theWorld.rayTraceBlocks(eyesPos, hitVec, false, true, false) != null)
                 ) continue
 
-                val rotation = calculateRotation(eyesPos, hitVec)
-                if (!isValidBlockRotation(neighbor, eyesPos, rotation)) continue
+                val rotation = ScaffoldRotationManager.calculateRotation(eyesPos, hitVec)
+                if (!ScaffoldRotationManager.isValidBlockRotation(neighbor, eyesPos, rotation, mc)) continue
 
                 if (placeRotation == null || getRotationDifference(rotation) < getRotationDifference(placeRotation.rotation)) {
                     placeRotation = PlaceRotation(PlaceInfo(neighbor, side.opposite, hitVec), rotation)
@@ -1031,60 +939,28 @@ object Scaffold : Module() {
         }
 
         placeRotation ?: return false
-        val fixYaw = round(placeRotation.rotation.yaw / 45f) * 45f
+        val fixYaw = round(placeRotation.rotation.yaw / YAW_STEP_45) * YAW_STEP_45
         val stabilized = if (fixYaw in steps4590) fixYaw else MovementUtils.movingYaw + steps4590[0]
-        lockRotation = if (bridgeMode.equals("GodBridge")) Rotation(if (isLookingDiagonally) MovementUtils.movingYaw - 180 else MovementUtils.movingYaw - 135F, 78F) else when (rotationsValue.get().lowercase()) {
-            "normal" -> {
-                placeRotation.rotation
-            }
-
-            "stabilized" -> {
-                Rotation(
-                    stabilized,
-                    placeRotation.rotation.pitch
-                )
-            }
-
-            "watchdog" -> {
-                Rotation(
-                    if (watchDogDelay.get() > PlayerUtils.offGroundTicks && (!towerStatus && (!watchdogBoostValue.get() || !GameSettings.isKeyDown(mc.gameSettings.keyBindUseItem))) && watchdogTellyValue.get() && bridgeMode.equals("WatchDog")) MovementUtils.movingYaw else MovementUtils.movingYaw - 180,
-                    placeRotation.rotation.pitch
-                )
-            }
-
-            "watchdog2" -> {
-                val currentYaw = MovementUtils.movingYaw
-                val yawDiffTo180 = currentYaw - 180.0F
-                val diagonalYaw = if (isDiagonal(currentYaw)) {
-                    yawDiffTo180
-                } else {
-                    currentYaw - 135.0F * (if ((currentYaw + 180.0F) % 90.0F < 45.0F) 1.0F else -1.0F)
-                }
-                Rotation(diagonalYaw, placeRotation.rotation.pitch)
-            }
-
-            "telly" -> {
-                Rotation(
-                    if (prevTowered) fixYaw else if (!shouldPlace()) MovementUtils.movingYaw else fixYaw,
-                    placeRotation.rotation.pitch
-                )
-            }
-
-            "snap" -> {
-                Rotation(MovementUtils.movingYaw + 180, placeRotation.rotation.pitch)
-            }
-
-            "spin" -> {
-                spinYaw += 45F
-                if (spinYaw > 180F) {
-                    spinYaw -= 360F
-                }
-                Rotation(spinYaw, placeRotation.rotation.pitch)
-            }
-
-            else -> {
-                Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
-            }
+        lockRotation = if (bridgeMode.equals("GodBridge")) {
+            Rotation(
+                if (isLookingDiagonally) MovementUtils.movingYaw - YAW_WRAP_ANGLE else MovementUtils.movingYaw - YAW_STEP_135, 
+                GODBRIGE_ALT_ROTATION_PITCH
+            )
+        } else {
+            ScaffoldRotationManager.calculateSearchRotation(
+                rotationsValue.get(),
+                placeRotation,
+                bridgeMode.get(),
+                isLookingDiagonally,
+                towerStatus,
+                watchdogTellyValue.get(),
+                watchDogDelay.get(),
+                watchdogBoostValue.get(),
+                GameSettings.isKeyDown(mc.gameSettings.keyBindUseItem),
+                prevTowered,
+                shouldPlace(),
+                steps4590
+            )
         }
         val limitedRotation =
             RotationUtils.limitAngleChange(
@@ -1105,41 +981,7 @@ object Scaffold : Module() {
         return true
     }
 
-    private fun generateOffsets(): Sequence<Vec3> = sequence {
-        val step = 0.1
-        var x = step
-        while (x < 0.9) {
-            var y = step
-            while (y < 0.9) {
-                var z = step
-                while (z < 0.9) {
-                    yield(Vec3(x, y, z))
-                    z += step
-                }
-                y += step
-            }
-            x += step
-        }
-    }
 
-    private fun calculateRotation(eyesPos: Vec3, hitVec: Vec3): Rotation {
-        val diffX = hitVec.xCoord - eyesPos.xCoord
-        val diffY = hitVec.yCoord - eyesPos.yCoord
-        val diffZ = hitVec.zCoord - eyesPos.zCoord
-        val diffXZ = MathHelper.sqrt_double(diffX * diffX + diffZ * diffZ).toDouble()
-
-        return Rotation(
-            MathHelper.wrapAngleTo180_float(Math.toDegrees(atan2(diffZ, diffX)).toFloat() - 90f),
-            MathHelper.wrapAngleTo180_float(-Math.toDegrees(atan2(diffY, diffXZ)).toFloat())
-        )
-    }
-
-    private fun isValidBlockRotation(neighbor: BlockPos, eyesPos: Vec3, rotation: Rotation): Boolean {
-        val rotationVector = RotationUtils.getVectorForRotation(rotation)
-        val vector = eyesPos.addVector(rotationVector.xCoord * 4, rotationVector.yCoord * 4, rotationVector.zCoord * 4)
-        val obj = mc.theWorld.rayTraceBlocks(eyesPos, vector, false, false, true)
-        return obj.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && obj.blockPos == neighbor
-    }
     private val rotationSpeed: Float
         get() = if (rotationSpeedValue.get()) (Math.random() * (maxRotationSpeedValue.get() - minRotationSpeedValue.get()) + minRotationSpeedValue.get()).toFloat() else Float.MAX_VALUE
     private val getDelay: Long
