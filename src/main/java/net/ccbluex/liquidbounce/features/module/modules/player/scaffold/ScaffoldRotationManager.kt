@@ -2,6 +2,11 @@ package net.ccbluex.liquidbounce.features.module.modules.player.scaffold
 
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.DEFAULT_ROTATION_PITCH
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.DIRECTION_VEC_MULTIPLIER
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.GODBRIGE_ROTATION_PITCH
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.MAX_REACH_DISTANCE_SQ
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.OFFSET_MAX
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.OFFSET_STEP
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.RAY_TRACE_DISTANCE
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.RAY_TRACE_MULTIPLIER
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.SPIN_YAW_INCREMENT
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.YAW_DIAGONAL_MAX
@@ -9,6 +14,7 @@ import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.Scaffold
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.YAW_STEP_135
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.YAW_STEP_45
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.YAW_WRAP_ANGLE
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.data.PlaceRotation
 import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.utils.PlayerUtils
 import net.ccbluex.liquidbounce.utils.Rotation
@@ -23,8 +29,6 @@ import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.round
 
-data class PlaceRotation(val placeInfo: PlaceInfo, val rotation: Rotation)
-
 object ScaffoldRotationManager {
     private var spinYaw = 0f
     
@@ -34,7 +38,7 @@ object ScaffoldRotationManager {
 
     fun calculateRotationForMode(
         mode: String,
-        placeRotation: PlaceRotation?,
+        placeRotation:PlaceRotation?,
         lockRotation: Rotation?,
         bridgeMode: String,
         isLookingDiagonally: Boolean,
@@ -194,18 +198,18 @@ object ScaffoldRotationManager {
     }
 
     fun generateOffsets(): Sequence<Vec3> = sequence {
-        var x = ScaffoldConstants.OFFSET_STEP
-        while (x < ScaffoldConstants.OFFSET_MAX) {
-            var y = ScaffoldConstants.OFFSET_STEP
-            while (y < ScaffoldConstants.OFFSET_MAX) {
-                var z = ScaffoldConstants.OFFSET_STEP
-                while (z < ScaffoldConstants.OFFSET_MAX) {
+        var x = OFFSET_STEP
+        while (x < OFFSET_MAX) {
+            var y = OFFSET_STEP
+            while (y < OFFSET_MAX) {
+                var z = OFFSET_STEP
+                while (z < OFFSET_MAX) {
                     yield(Vec3(x, y, z))
-                    z += ScaffoldConstants.OFFSET_STEP
+                    z += OFFSET_STEP
                 }
-                y += ScaffoldConstants.OFFSET_STEP
+                y += OFFSET_STEP
             }
-            x += ScaffoldConstants.OFFSET_STEP
+            x += OFFSET_STEP
         }
     }
 

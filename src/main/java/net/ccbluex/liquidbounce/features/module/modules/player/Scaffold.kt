@@ -5,10 +5,16 @@ import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.ModuleInfo
 import net.ccbluex.liquidbounce.features.module.modules.movement.Speed
-import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.PlaceRotation
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.data.PlaceRotation
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldRotationManager
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldTowerHelper
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.bridge.BridgeMode
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.bridge.impl.*
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.tower.TowerMode
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.tower.impl.*
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.rotation.RotationMode
+import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.rotation.impl.*
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.DEFAULT_ROTATION_PITCH
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.GODBRIGE_ALT_ROTATION_PITCH
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.GODBRIGE_ROTATION_PITCH
@@ -249,6 +255,73 @@ object Scaffold : Module() {
     }
     private val steps45 = arrayListOf(-135f, -45f, 45f, 135f)
     private val steps4590 = arrayListOf(-180f, -135f, -45f, 45f, 135f, 180f)
+    
+    // Bridge Mode instances
+    private val normalBridge = NormalBridge()
+    private val tellyBridge = TellyBridge()
+    private val keepUPBridge = KeepUPBridge()
+    private val watchDogBridge = WatchDogBridge(
+        watchdogBoostValue = { watchdogBoostValue.get() },
+        lowHopValue = { lowHopValue.get() },
+        watchdogExtraClick = { watchdogExtraClick.get() },
+        getSpeed = { getSpeed() }
+    )
+    private val godBridge = GodBridge(
+        motionValue = { motionValue.get() },
+        minBlockPlace = { minBlockPlace.get() },
+        maxBlockPlace = { maxBlockPlace.get() },
+        onPlaced = { godBridgePlaceTicks++ },
+        resetPlaceTicks = { godBridgePlaceTicks = 0; randomGodBridgePlaceTicks = 0 }
+    )
+    private val keepYBridge = KeepYBridge(
+        keepYMode = { keepYMode.get() },
+        isKeepYSpecialTick = { isKeepYSpecialTick() }
+    )
+    private val andromedaBridge = AndromedaBridge(
+        andJump = { andJump.get() },
+        onLockRotationNull = { lockRotation = null }
+    )
+    
+    private var currentBridge: BridgeMode = normalBridge
+    
+    // Tower Mode instances
+    private val noneTower = NoneTower()
+    private val ncpTower = NCPTower()
+    private val blocksMCTower = BlocksMCTower()
+    private val vanillaTower = VanillaTower()
+    private val lowHopTower = LowHopTower()
+    private val fastJumpTower = FastJumpTower()
+    private val aacTower = AACTower()
+    private val timerTower = TimerTower()
+    private val advancedTimerTower = AdvancedTimerTower()
+    
+    private var currentTower: TowerMode = noneTower
+    
+    // Rotation Mode instances
+    private val normalRotation = NormalRotation()
+    private val stabilizedRotation = StabilizedRotation(
+        getDefaultPitch = { DEFAULT_ROTATION_PITCH }
+    )
+    private val watchDogRotation = WatchDogRotation(
+        watchdogTellyValue = { watchdogTellyValue.get() },
+        watchDogDelay = { watchDogDelay.get() },
+        watchdogBoostValue = { watchdogBoostValue.get() },
+        keyBindUseItem = { GameSettings.isKeyDown(mc.gameSettings.keyBindUseItem) },
+        getDefaultPitch = { DEFAULT_ROTATION_PITCH }
+    )
+    private val watchDog2Rotation = WatchDog2Rotation(
+        getDefaultPitch = { DEFAULT_ROTATION_PITCH }
+    )
+    private val tellyRotation = TellyRotation(
+        getDefaultPitch = { DEFAULT_ROTATION_PITCH }
+    )
+    private val spinRotation = SpinRotation(
+        getDefaultPitch = { DEFAULT_ROTATION_PITCH }
+    )
+    private val snapRotation = SnapRotation()
+    private val noneRotation = NoneRotation()
+    
+    private var currentRotation: RotationMode = normalRotation
     /**
      * Enable module
      */
@@ -278,6 +351,31 @@ object Scaffold : Module() {
      */
     @EventTarget
     fun onTick(event: TickEvent) {
+        // Update current bridge mode
+        currentBridge = when (bridgeMode.get()) {
+            "Normal" -> normalBridge
+            "Telly" -> tellyBridge
+            "KeepUP" -> keepUPBridge
+            "WatchDog" -> watchDogBridge
+            "GodBridge" -> godBridge
+            "Keep-Y" -> keepYBridge
+            "Andromeda" -> andromedaBridge
+            else -> normalBridge
+        }
+        
+        // Update current rotation mode
+        currentRotation = when (rotationsValue.get()) {
+            "Normal" -> normalRotation
+            "Stabilized" -> stabilizedRotation
+            "WatchDog" -> watchDogRotation
+            "WatchDog2" -> watchDog2Rotation
+            "Telly" -> tellyRotation
+            "Spin" -> spinRotation
+            "Snap" -> snapRotation
+            "None" -> noneRotation
+            else -> normalRotation
+        }
+        
         if (eagleValue.equals("Silent")) {
             if (!mc.thePlayer.onGround) {
                 y = null
@@ -296,15 +394,6 @@ object Scaffold : Module() {
         if (blockAmount == 0 && InventoryUtils.findAutoBlockBlock(highBlock.get()) != -1) {
             blockAmount = mc.thePlayer.inventory.getStackInSlot(InventoryUtils.findAutoBlockBlock(highBlock.get() && !highBlockMode.get() || !highBlock.get() && placeTick >= blockAmount || highBlock.get() && highBlockMode.get() && switchPlaceTick >= switchTickValue.get()) - 36).stackSize
         }
-        if (bridgeMode.equals("GodBridge")) {
-            if (godBridgePlaceTicks > randomGodBridgePlaceTicks && !towerStatus && mc.thePlayer.onGround) {
-                if (!motionValue.equals("MovementInput")) {
-                    MovementUtils.jump(true, motionValue.equals("Motion"))
-                    godBridgePlaceTicks = 0
-                    randomGodBridgePlaceTicks = RandomUtils.nextInt(minBlockPlace.get(), maxBlockPlace.get())
-                }
-            }
-        }
         if (mc.thePlayer.posY < lastGroundY!! || mc.thePlayer.posY < y!!) {
             y = null
             lastGroundY = null
@@ -317,59 +406,11 @@ object Scaffold : Module() {
         }
 
         if (!towerStatus) {
-            if (bridgeMode.equals("Keep-Y")) {
-                canKeepY = true
-                if (MovementUtils.isMoving() && onGround()) {
-                    when (keepYMode.get().lowercase()) {
-                        "onlyspeed" -> if (Speed.state) MovementUtils.jump(true)
-                        "vanilla", "jump a", "jump b" -> MovementUtils.jump(true)
-                    }
-                }
-                if (mc.thePlayer.onGround) {
-                    keepYTicks = 0
-                    firstKeepYPlace = false
-                } else {
-                    keepYTicks++
-                }
-            }
-            if (bridgeMode.equals("Telly")) {
-                if (onGround() && MovementUtils.isMoving()) {
-                    MovementUtils.jump(true)
-                }
-            }
-            if (bridgeMode.equals("KeepUP")) {
-                canKeepY = false
-                if (MovementUtils.isMoving() && onGround()) {
-                    MovementUtils.jump(true)
-                }
-            }
-            if (bridgeMode.equals("WatchDog")) {
-                if (MovementUtils.isMoving()) {
-                        if (mc.thePlayer.onGround) {
-                            if (watchdogBoostValue.get()) {
-                                if (!Speed.state) {
-                                    MovementUtils.setMotion(getSpeed().toDouble())
-                                    mc.thePlayer.motionY = JUMP_MOTION_ALT
-                                }
-                            } else {
-                                MovementUtils.jump(true)
-                            }
-                        }
-                        if (lowHopValue.equals("WatchDog")) {
-                            if (PlayerUtils.offGroundTicks == 5) {
-                                mc.thePlayer.motionY = MovementUtils.predictedMotion(mc.thePlayer.motionY, 2)
-                            }
-                        }
-                }
-            }
-        }
-        if (bridgeMode.equals("Andromeda")) {
-            if (BlockUtils.getBlock(BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ).down()) !is BlockAir && BlockUtils.getBlock(BlockPos(mc.thePlayer.posX, mc.thePlayer.posY + 2, mc.thePlayer.posZ)) !is BlockAir) {
-                if (andJump.get() && mc.thePlayer.onGround) {
-                    MovementUtils.jump(true)
-                }
-                lockRotation = null
-            }
+            // Execute current bridge mode
+            currentBridge.execute(mc, towerStatus)
+            
+            // Update canKeepY based on bridge mode
+            canKeepY = currentBridge.shouldKeepY()
         }
         if (towerStatus) {
             if (MovementUtils.isMoving()) {
@@ -667,34 +708,19 @@ object Scaffold : Module() {
 
         val blockPosition = if (shouldGoDown && downValue.get()) {
             BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1.0, mc.thePlayer.posZ)
-        } else if (bridgeMode.equals("Telly") && !towerStatus) {
-            BlockPos(mc.thePlayer.posX, lastGroundY!!.toDouble() - 1.0, mc.thePlayer.posZ)
-        } else if (bridgeMode.equals("WatchDog") && !towerStatus && watchdogExtraClick.get() && (!watchdogBoostValue.get() || !GameSettings.isKeyDown(mc.gameSettings.keyBindUseItem))) {
-            if (BlockUtils.getBlock(BlockPos(mc.thePlayer.posX, lastGroundY!!.toDouble() - 1.0, mc.thePlayer.posZ)) !is BlockAir && BlockUtils.getBlock(BlockPos(mc.thePlayer.posX, lastGroundY!!.toDouble(), mc.thePlayer.posZ)) is BlockAir && (mc.thePlayer.posY > lastGroundY!! && mc.thePlayer.posY + MovementUtils.predictedMotion(mc.thePlayer.motionY, 3) < lastGroundY!! + 1 && (started || PlayerUtils.offGroundTicks > 1))) {
-                BlockPos(mc.thePlayer.posX, lastGroundY!!.toDouble(), mc.thePlayer.posZ)
-            } else {
-                BlockPos(mc.thePlayer.posX, lastGroundY!!.toDouble() - 1.0, mc.thePlayer.posZ)
-            }
-        } else if (bridgeMode.equals("Keep-Y") && !towerStatus) {
-            val mode = keepYMode.get().lowercase()
-            val yPos = if (isKeepYSpecialTick()) {
-                lastGroundY!!.toDouble()
-            } else {
-                lastGroundY!!.toDouble() - 1.0
-            }
-            BlockPos(mc.thePlayer.posX, yPos, mc.thePlayer.posZ)
-        } else if (bridgeMode.equals("Andromeda") && !towerStatus) {
-            if (BlockUtils.getBlock(BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ).down()) is BlockAir) {
-                BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ).down()
-            } else {
-                BlockPos(mc.thePlayer.posX, mc.thePlayer.posY + 2, mc.thePlayer.posZ)
-            }
-        } else if (mc.thePlayer.posY == mc.thePlayer.posY.toInt() + 0.5 && !canKeepY) {
-            BlockPos(mc.thePlayer)
-        } else if (canKeepY) {
-            BlockPos(mc.thePlayer.posX, lastGroundY!! - 1.0, mc.thePlayer.posZ)
         } else {
-            BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ).down()
+            // Try to get Y position from current bridge mode
+            val bridgeY = if (!towerStatus) currentBridge.getPlaceY(mc, lastGroundY) else null
+            
+            if (bridgeY != null) {
+                BlockPos(mc.thePlayer.posX, bridgeY, mc.thePlayer.posZ)
+            } else if (mc.thePlayer.posY == mc.thePlayer.posY.toInt() + 0.5 && !canKeepY) {
+                BlockPos(mc.thePlayer)
+            } else if (canKeepY) {
+                BlockPos(mc.thePlayer.posX, lastGroundY!! - 1.0, mc.thePlayer.posZ)
+            } else {
+                BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ).down()
+            }
         }
         if (!expand && (!isReplaceable(blockPosition) || search(
                 blockPosition,
