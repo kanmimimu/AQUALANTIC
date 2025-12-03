@@ -7,11 +7,7 @@ import net.minecraft.block.BlockAir
 import net.minecraft.client.Minecraft
 import net.minecraft.util.BlockPos
 
-/**
- * Andromedaブリッジモード
- * 
- * 特殊なブロック配置ロジックを持つモード
- */
+
 class AndromedaBridge(
     private val andJump: () -> Boolean,
     private val onLockRotationNull: () -> Unit
@@ -30,14 +26,14 @@ class AndromedaBridge(
         val blockBelow = BlockUtils.getBlock(posBelow)
         val blockAbove = BlockUtils.getBlock(posAbove)
         
-        // 下にブロックがあり、上にもブロックがある場合
+
         if (blockBelow !is BlockAir && blockAbove !is BlockAir) {
-            // andJumpが有効で地面にいる場合、ジャンプ
+
             if (andJump() && player.onGround) {
                 MovementUtils.jump(true)
             }
             
-            // ロックローテーションをnullに設定
+
             onLockRotationNull()
             return true
         }
@@ -59,11 +55,11 @@ class AndromedaBridge(
         val posBelow = BlockPos(player.posX, player.posY, player.posZ).down()
         val blockBelow = BlockUtils.getBlock(posBelow)
         
-        // 下にブロックがない場合: 下に配置
+
         return if (blockBelow is BlockAir) {
             player.posY - 1.0
         } else {
-            // 下にブロックがある場合: 2ブロック上に配置
+
             player.posY + 2.0
         }
     }

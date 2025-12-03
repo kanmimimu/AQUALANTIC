@@ -5,12 +5,7 @@ import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.utils.misc.RandomUtils
 import net.minecraft.client.Minecraft
 
-/**
- * GodBridgeブリッジモード
- * 
- * 高速ブリッジング用のモード
- * ランダムなティック数でジャンプを行う
- */
+
 class GodBridge(
     private val motionValue: () -> String,
     private val minBlockPlace: () -> Int,
@@ -29,11 +24,11 @@ class GodBridge(
     override fun execute(mc: Minecraft, towerStatus: Boolean): Boolean {
         val player = mc.thePlayer ?: return false
         
-        // タワー中でない、地面にいる、配置ティックが規定数を超えた場合
+
         if (godBridgePlaceTicks > randomGodBridgePlaceTicks && !towerStatus && player.onGround) {
             val motion = motionValue()
             if (motion != "MovementInput") {
-                // ジャンプ実行
+
                 MovementUtils.jump(true, motion == "Motion")
                 godBridgePlaceTicks = 0
                 randomGodBridgePlaceTicks = RandomUtils.nextInt(minBlockPlace(), maxBlockPlace())

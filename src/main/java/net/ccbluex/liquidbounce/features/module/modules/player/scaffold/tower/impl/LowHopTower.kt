@@ -5,10 +5,7 @@ import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.tower.To
 import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.minecraft.client.Minecraft
 
-/**
- * LowHop タワーモード
- * 低いジャンプでのタワー動作
- */
+
 class LowHopTower : TowerMode {
     override fun execute(mc: Minecraft): Boolean {
         val player = mc.thePlayer ?: return false

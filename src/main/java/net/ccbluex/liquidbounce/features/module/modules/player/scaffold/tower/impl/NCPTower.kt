@@ -9,10 +9,7 @@ import net.ccbluex.liquidbounce.utils.PlayerUtils
 import net.minecraft.client.Minecraft
 import kotlin.math.floor
 
-/**
- * NCP タワーモード
- * NoCheatPlusサーバー用のタワー動作
- */
+
 class NCPTower : TowerMode {
     override fun execute(mc: Minecraft): Boolean {
         val player = mc.thePlayer ?: return false

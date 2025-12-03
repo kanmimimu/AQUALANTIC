@@ -6,10 +6,7 @@ import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.data.Pla
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.rotation.RotationMode
 import net.ccbluex.liquidbounce.utils.Rotation
 
-/**
- * Spin ローテーションモード
- * 回転し続けるローテーション
- */
+
 class SpinRotation(
     private val getDefaultPitch: () -> Float
 ) : RotationMode {

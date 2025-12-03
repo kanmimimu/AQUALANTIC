@@ -4,11 +4,7 @@ import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.bridge.B
 import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.minecraft.client.Minecraft
 
-/**
- * KeepUPブリッジモード
- * 
- * 移動中に常にジャンプし続ける
- */
+
 class KeepUPBridge : BridgeMode {
     override fun isActive(mc: Minecraft): Boolean {
         return true
@@ -19,7 +15,7 @@ class KeepUPBridge : BridgeMode {
         
         val player = mc.thePlayer ?: return false
         
-        // 移動中で地面にいる場合、ジャンプ
+
         if (MovementUtils.isMoving() && player.onGround) {
             MovementUtils.jump(true)
             return true
@@ -33,7 +29,7 @@ class KeepUPBridge : BridgeMode {
     }
     
     override fun shouldKeepY(): Boolean {
-        // KeepUPモードはcanKeepYをfalseに設定
+
         return false
     }
     

@@ -11,12 +11,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.GameSettings
 import net.minecraft.util.BlockPos
 
-/**
- * WatchDogブリッジモード
- * 
- * WatchDogサーバー用の最適化されたブリッジング動作
- * ブーストモードとローホップをサポート
- */
+
 class WatchDogBridge(
     private val watchdogBoostValue: () -> Boolean,
     private val lowHopValue: () -> String,
@@ -34,23 +29,23 @@ class WatchDogBridge(
         val player = mc.thePlayer ?: return false
         
         if (MovementUtils.isMoving()) {
-            // 地面にいる場合
+
             if (player.onGround) {
                 if (watchdogBoostValue()) {
-                    // ブーストモード: Speedモジュールがオフの場合のみブースト
+
                     if (!Speed.state) {
                         MovementUtils.setMotion(getSpeed().toDouble())
                         player.motionY = JUMP_MOTION_ALT
                         return true
                     }
                 } else {
-                    // 通常モード: ジャンプ
+
                     MovementUtils.jump(true)
                     return true
                 }
             }
             
-            // ローホップ処理
+
             if (lowHopValue() == "WatchDog") {
                 if (PlayerUtils.offGroundTicks == 5) {
                     player.motionY = MovementUtils.predictedMotion(player.motionY, 2)
@@ -63,7 +58,7 @@ class WatchDogBridge(
     }
     
     override fun shouldPlace(offGroundTicks: Int, towerStatus: Boolean, prevTowered: Boolean): Boolean {
-        // WatchDogモード固有の配置ロジックはScaffold.kt側で処理される
+
         return true
     }
     
@@ -75,7 +70,7 @@ class WatchDogBridge(
         val player = mc.thePlayer ?: return null
         if (lastGroundY == null) return null
         
-        // WatchDogExtraClickが有効な場合の特別な処理
+
         if (watchdogExtraClick()) {
             val posBelow = BlockPos(player.posX, lastGroundY.toDouble() - 1.0, player.posZ)
             val posCurrent = BlockPos(player.posX, lastGroundY.toDouble(), player.posZ)

@@ -8,10 +8,7 @@ import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.utils.Rotation
 import kotlin.math.round
 
-/**
- * Telly ローテーションモード
- * Tellyブリッジング用のローテーション
- */
+
 class TellyRotation(
     private val getDefaultPitch: () -> Float
 ) : RotationMode {

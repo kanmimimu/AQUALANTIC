@@ -6,10 +6,7 @@ import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.rotation
 import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.utils.Rotation
 
-/**
- * Snap ローテーションモード
- * 移動方向から180度反転した方向にスナップ
- */
+
 class SnapRotation : RotationMode {
     override fun calculateStaticRotation(
         lockRotation: Rotation?,

@@ -174,46 +174,44 @@ object Scaffold : Module() {
 
     private val hitableCheckValue = ListValue("HitableCheck", arrayOf("Simple", "Strict", "Off"), "Simple")
 
-    // Visuals
+
     private val counter = BoolValue("Render", true)
 
-    /**
-     * MODULE
-     */
 
-    // Target block
+
+
     private var targetPlace: PlaceInfo? = null
 
-    // Last OnGround position
+
     private var lastGroundY: Int? = null
     var y: Int? = null
 
-    // Rotation lock
+
     private var lockRotation: Rotation? = null
 
 
-    //PrevItem
+
     private var prevItem = 0
 
-    // Auto block slot
+
     private var slot = 0
-    // cancel sprint
+
     private var cancelSprint = false
-    // Zitter Smooth
+
     private var zitterDirection = false
 
 
-    // Delay
+
     private val zitterTimer = MSTimer()
     private val delayTimer = TimerMS()
     private var lastPlace = 0
     private var delay = 0L
 
-    // Eagle
+
     private var placedBlocksWithoutEagle = 0
     private var eagleSneaking = false
 
-    // Down
+
     private var shouldGoDown = false
     private var intavePlaced = false
     private var intavePlacedHorizontal = false
@@ -224,14 +222,14 @@ object Scaffold : Module() {
     private var started = false
     private var prevTowered = false
 
-    //Sprint
+
     var sprintActive = false
     var ticks = 0
     private var towerTick = 0
     private var keepYTicks = 0
     private var firstKeepYPlace = false
 
-    //Place Ticks
+
     private var godBridgePlaceTicks = 0
     private var randomGodBridgePlaceTicks = 8
     private var tellyPlaceTicks = 0
@@ -256,7 +254,7 @@ object Scaffold : Module() {
     private val steps45 = arrayListOf(-135f, -45f, 45f, 135f)
     private val steps4590 = arrayListOf(-180f, -135f, -45f, 45f, 135f, 180f)
     
-    // Bridge Mode instances
+
     private val normalBridge = NormalBridge()
     private val tellyBridge = TellyBridge()
     private val keepUPBridge = KeepUPBridge()
@@ -284,7 +282,7 @@ object Scaffold : Module() {
     
     private var currentBridge: BridgeMode = normalBridge
     
-    // Tower Mode instances
+
     private val noneTower = NoneTower()
     private val ncpTower = NCPTower()
     private val blocksMCTower = BlocksMCTower()
@@ -297,7 +295,7 @@ object Scaffold : Module() {
     
     private var currentTower: TowerMode = noneTower
     
-    // Rotation Mode instances
+
     private val normalRotation = NormalRotation()
     private val stabilizedRotation = StabilizedRotation(
         getDefaultPitch = { DEFAULT_ROTATION_PITCH }
@@ -322,9 +320,7 @@ object Scaffold : Module() {
     private val noneRotation = NoneRotation()
     
     private var currentRotation: RotationMode = normalRotation
-    /**
-     * Enable module
-     */
+
     override fun onEnable() {
         started = false
         prevTowered = false
@@ -344,14 +340,9 @@ object Scaffold : Module() {
         zitterTimer.reset()
         tellyPlaceTicks = 0
     }
-    /**
-     * Update event
-     *
-     * @param event
-     */
     @EventTarget
     fun onTick(event: TickEvent) {
-        // Update current bridge mode
+
         currentBridge = when (bridgeMode.get()) {
             "Normal" -> normalBridge
             "Telly" -> tellyBridge
@@ -363,7 +354,7 @@ object Scaffold : Module() {
             else -> normalBridge
         }
         
-        // Update current rotation mode
+
         currentRotation = when (rotationsValue.get()) {
             "Normal" -> normalRotation
             "Stabilized" -> stabilizedRotation
@@ -406,10 +397,10 @@ object Scaffold : Module() {
         }
 
         if (!towerStatus) {
-            // Execute current bridge mode
+
             currentBridge.execute(mc, towerStatus)
             
-            // Update canKeepY based on bridge mode
+
             canKeepY = currentBridge.shouldKeepY()
         }
         if (towerStatus) {
@@ -471,7 +462,7 @@ object Scaffold : Module() {
             GameSettings.isKeyDown(mc.gameSettings.keyBindSneak) && mc.thePlayer.inventory.getStackInSlot(InventoryUtils.findAutoBlockBlock(highBlock.get() && !highBlockMode.get() || !highBlock.get() && placeTick >= blockAmount || highBlock.get() && highBlockMode.get() && switchPlaceTick >= switchTickValue.get())).stackSize > 1
         if (shouldGoDown && !downValue.get()) mc.gameSettings.keyBindSneak.pressed = false
         if (mc.thePlayer.onGround) {
-            // Smooth Zitter
+
             if (zitterModeValue.get()) {
                 if (!GameSettings.isKeyDown(mc.gameSettings.keyBindRight)) mc.gameSettings.keyBindRight.pressed =
                     false
@@ -489,7 +480,7 @@ object Scaffold : Module() {
                     mc.gameSettings.keyBindLeft.pressed = true
                 }
             }
-            // Eagle
+
             if (!eagleValue.get().equals("Off", true) && !shouldGoDown) {
                 var dif = 0.5
                 val blockPos = BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1.0, mc.thePlayer.posZ)
@@ -675,7 +666,7 @@ object Scaffold : Module() {
         }
         rotationStatic()
 
-        // Place block
+
     }
 
     private fun doTowerMove(mode: String) {
@@ -700,16 +691,14 @@ object Scaffold : Module() {
         }
     }
 
-    /**
-     * Search for new target block
-     */
+
     private fun findBlock(expand: Boolean) {
         if (lastGroundY == null) return
 
         val blockPosition = if (shouldGoDown && downValue.get()) {
             BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1.0, mc.thePlayer.posZ)
         } else {
-            // Try to get Y position from current bridge mode
+
             val bridgeY = if (!towerStatus) currentBridge.getPlaceY(mc, lastGroundY) else null
             
             if (bridgeY != null) {
@@ -761,9 +750,7 @@ object Scaffold : Module() {
         return true
     }
 
-    /**
-     * Place target block
-     */
+
     private fun place() {
         if (targetPlace == null || !shouldPlace()) return
         if (!rotationsValue.equals("None")) {
@@ -824,13 +811,11 @@ object Scaffold : Module() {
                 }
             }
         }
-        // Reset
+
         targetPlace = null
     }
 
-    /**
-     * Disable scaffold module
-     */
+
     override fun onDisable() {
         intavePlaced = false
         intavePlacedHorizontal = false
@@ -876,11 +861,6 @@ object Scaffold : Module() {
     }
 
 
-    /**
-     * Entity movement event
-     *
-     * @param event
-     */
     @EventTarget
     fun onMove(event: MoveEvent) {
         if (sprintModeValue.equals("Custom")) {
@@ -918,13 +898,6 @@ object Scaffold : Module() {
         }
     }
 
-    /**
-     * Search for placeable block
-     *
-     * @param blockPosition pos
-     * @param checks        visible
-     * @return
-     */
     private fun search(blockPosition: BlockPos, checks: Boolean): Boolean {
         val blockPos: BlockPos = blockPosition
         if (!isReplaceable(blockPos)) return false

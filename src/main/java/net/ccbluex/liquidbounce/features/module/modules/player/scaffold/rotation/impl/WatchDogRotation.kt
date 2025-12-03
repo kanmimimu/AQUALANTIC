@@ -7,10 +7,7 @@ import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.utils.PlayerUtils
 import net.ccbluex.liquidbounce.utils.Rotation
 
-/**
- * WatchDog ローテーションモード
- * WatchDogサーバー用のローテーション
- */
+
 class WatchDogRotation(
     private val watchdogTellyValue: () -> Boolean,
     private val watchDogDelay: () -> Int,

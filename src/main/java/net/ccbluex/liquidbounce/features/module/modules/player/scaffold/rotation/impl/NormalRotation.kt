@@ -4,10 +4,7 @@ import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.data.Pla
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.rotation.RotationMode
 import net.ccbluex.liquidbounce.utils.Rotation
 
-/**
- * Normal ローテーションモード
- * ターゲットブロックに対して直接回転
- */
+
 class NormalRotation : RotationMode {
     override fun calculateStaticRotation(
         lockRotation: Rotation?,
@@ -17,7 +14,7 @@ class NormalRotation : RotationMode {
         prevTowered: Boolean,
         shouldPlace: Boolean
     ): Rotation? {
-        // Normalモードは静的ローテーションを返さない
+
         return null
     }
     
@@ -30,7 +27,7 @@ class NormalRotation : RotationMode {
         shouldPlace: Boolean,
         steps4590: ArrayList<Float>
     ): Rotation {
-        // ターゲットブロックの回転をそのまま返す
+
         return placeRotation.rotation
     }
 }

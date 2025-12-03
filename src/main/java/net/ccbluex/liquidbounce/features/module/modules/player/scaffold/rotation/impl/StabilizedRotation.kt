@@ -8,10 +8,7 @@ import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.utils.Rotation
 import kotlin.math.round
 
-/**
- * Stabilized ローテーションモード
- * 45度の倍数に安定化された回転
- */
+
 class StabilizedRotation(
     private val getDefaultPitch: () -> Float
 ) : RotationMode {

@@ -9,10 +9,7 @@ import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.utils.Rotation
 import kotlin.math.abs
 
-/**
- * WatchDog2 ローテーションモード
- * WatchDogサーバー用の代替ローテーション
- */
+
 class WatchDog2Rotation(
     private val getDefaultPitch: () -> Float
 ) : RotationMode {

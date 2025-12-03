@@ -7,10 +7,7 @@ import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.minecraft.client.Minecraft
 import kotlin.math.floor
 
-/**
- * AAC タワーモード
- * AdvancedAntiCheat用のタワー動作
- */
+
 class AACTower : TowerMode {
     override fun execute(mc: Minecraft): Boolean {
         val player = mc.thePlayer ?: return false

@@ -4,10 +4,7 @@ import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.data.Pla
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.rotation.RotationMode
 import net.ccbluex.liquidbounce.utils.Rotation
 
-/**
- * None ローテーションモード
- * ローテーションを行わない
- */
+
 class NoneRotation : RotationMode {
     override fun calculateStaticRotation(
         lockRotation: Rotation?,
@@ -29,7 +26,7 @@ class NoneRotation : RotationMode {
         shouldPlace: Boolean,
         steps4590: ArrayList<Float>
     ): Rotation {
-        // ローテーションなし
+
         return Rotation(0f, 0f)
     }
 }
