@@ -1003,3 +1003,4 @@ object Scaffold : Module() {
         return mc.thePlayer.onGround || PlayerUtils.offGroundTicks == 0
     }
 }
+

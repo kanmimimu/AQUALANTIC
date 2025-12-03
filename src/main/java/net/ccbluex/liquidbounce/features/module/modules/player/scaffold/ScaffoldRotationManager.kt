@@ -1,12 +1,8 @@
 package net.ccbluex.liquidbounce.features.module.modules.player.scaffold
 
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.DEFAULT_ROTATION_PITCH
-import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.DIRECTION_VEC_MULTIPLIER
-import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.GODBRIGE_ROTATION_PITCH
-import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.MAX_REACH_DISTANCE_SQ
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.OFFSET_MAX
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.OFFSET_STEP
-import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.RAY_TRACE_DISTANCE
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.RAY_TRACE_MULTIPLIER
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.SPIN_YAW_INCREMENT
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.YAW_DIAGONAL_MAX
@@ -19,8 +15,6 @@ import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.utils.PlayerUtils
 import net.ccbluex.liquidbounce.utils.Rotation
 import net.ccbluex.liquidbounce.utils.RotationUtils
-import net.ccbluex.liquidbounce.utils.block.PlaceInfo
-import net.minecraft.client.settings.GameSettings
 import net.minecraft.util.BlockPos
 import net.minecraft.util.MathHelper
 import net.minecraft.util.MovingObjectPosition

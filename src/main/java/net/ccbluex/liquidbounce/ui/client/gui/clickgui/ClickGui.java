@@ -93,8 +93,8 @@ public class ClickGui extends GuiScreen {
         this.mouseY = mouseY;
 
         drawDefaultBackground();
-        drawImage(new ResourceLocation("CrossSine/custom_hud_icon.png"), 9, height - 41, 32, 32);
-        drawImage(new ResourceLocation("CrossSine/ui/misc/setting.png"), 9, height - 79, 32, 32);
+        RenderUtils.drawImage(new ResourceLocation("CrossSine/custom_hud_icon.png"), 9, height - 41, 32, 32);
+        RenderUtils.drawImage(new ResourceLocation("CrossSine/ui/misc/setting.png"), 9, height - 79, 32, 32);
         GlStateManager.resetColor();
 
         switch (Objects.requireNonNull(CrossSine.moduleManager.getModule(ClickGUIModule.class)).animationValue.get().toLowerCase()) {
