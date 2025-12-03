@@ -140,7 +140,7 @@ public abstract class MixinGuiInGame extends MixinGui {
                     if (shouldReplace) {
                         // 最初の2文字（カラーコード）を保持（SCSampleと同じ）
                         String colorCode = displayName.length() >= 2 ? displayName.substring(0, 2) : "\u00a79";
-                        displayName = colorCode + "AQUALANTIC.com";
+                        displayName = colorCode + "aqualantic.com";
                     }
                 } catch (Exception e) {
                     // エラーが発生した場合はそのまま
@@ -164,7 +164,7 @@ public abstract class MixinGuiInGame extends MixinGui {
                         boolean containsDomain = !nameWithoutFormatting.isEmpty() && domainPattern.matcher(nameWithoutFormatting).find();
                         if (!nameWithoutFormatting.isEmpty() && (!trimmedServerIP.isEmpty() && nameWithoutFormatting.toLowerCase().contains(trimmedServerIP) || containsDomain)) {
                             String colorCode = s.length() >= 2 ? s.substring(0, 2) : "\u00a79";
-                            s = colorCode + "AQUALANTIC.com";
+                            s = colorCode + "aqualantic.com";
                         }
                     } catch (Exception e) {
                         // エラー時はそのまま
@@ -205,7 +205,7 @@ public abstract class MixinGuiInGame extends MixinGui {
                         boolean containsDomain = !nameWithoutFormatting.isEmpty() && domainPattern.matcher(nameWithoutFormatting).find();
                         if (!nameWithoutFormatting.isEmpty() && (!trimmedServerIP.isEmpty() && nameWithoutFormatting.toLowerCase().contains(trimmedServerIP) || containsDomain)) {
                             String colorCode = s1.length() >= 2 ? s1.substring(0, 2) : "\u00a79";
-                            s1 = colorCode + "AQUALANTIC.com";
+                            s1 = colorCode + "aqualantic.com";
                         }
                     } catch (Exception e) {
                         // エラー時はそのまま
@@ -237,7 +237,7 @@ public abstract class MixinGuiInGame extends MixinGui {
                             boolean containsDomain = !nameWithoutFormatting.isEmpty() && domainPattern.matcher(nameWithoutFormatting).find();
                             if (!nameWithoutFormatting.isEmpty() && (!trimmedServerIP.isEmpty() && nameWithoutFormatting.toLowerCase().equals(trimmedServerIP) || containsDomain)) {
                                 String colorCode = s3.length() >= 2 ? s3.substring(0, 2) : "\u00a79";
-                                s3 = colorCode + "AQUALANTIC.com";
+                                s3 = colorCode + "aqualantic.com";
                             }
                         } catch (Exception e) {
                             // エラー時はそのまま
