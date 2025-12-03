@@ -1,9 +1,7 @@
 
 package net.ccbluex.liquidbounce.features.module
 
-import net.ccbluex.liquidbounce.features.module.modules.visual.Interface
 import org.lwjgl.input.Keyboard
-import kotlin.reflect.KClass
 
 @kotlin.annotation.Retention(AnnotationRetention.RUNTIME)
 annotation class ModuleInfo(

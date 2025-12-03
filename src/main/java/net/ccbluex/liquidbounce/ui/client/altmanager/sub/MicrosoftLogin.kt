@@ -1,10 +1,8 @@
 package net.ccbluex.liquidbounce.ui.client.altmanager.sub
 
-import net.ccbluex.liquidbounce.CrossSine
-
 import me.liuli.elixir.account.MicrosoftAccount
 import me.liuli.elixir.compat.OAuthServer
-
+import net.ccbluex.liquidbounce.CrossSine
 import net.ccbluex.liquidbounce.utils.ClientUtils
 import net.ccbluex.liquidbounce.utils.extensions.drawCenteredString
 import net.ccbluex.liquidbounce.utils.misc.MiscUtils

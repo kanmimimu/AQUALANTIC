@@ -8,7 +8,7 @@ import net.ccbluex.liquidbounce.features.module.modules.other.disablers.Disabler
 import net.ccbluex.liquidbounce.features.value.BoolValue
 import net.ccbluex.liquidbounce.features.value.Value
 import net.ccbluex.liquidbounce.utils.ClassUtils
-import java.util.LinkedList
+import java.util.*
 
 @ModuleInfo(name = "Disabler" ,category = ModuleCategory.OTHER)
 class Disabler : Module() {

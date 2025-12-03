@@ -1,10 +1,8 @@
 package net.ccbluex.liquidbounce.file.configs
 
-import net.ccbluex.liquidbounce.CrossSine
-
 import com.google.gson.JsonArray
 import com.google.gson.JsonParser
-
+import net.ccbluex.liquidbounce.CrossSine
 import net.ccbluex.liquidbounce.features.module.modules.visual.XRay
 import net.ccbluex.liquidbounce.file.FileConfig
 import net.ccbluex.liquidbounce.file.FileManager

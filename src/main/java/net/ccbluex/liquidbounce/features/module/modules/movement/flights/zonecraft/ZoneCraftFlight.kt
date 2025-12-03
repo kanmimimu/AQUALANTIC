@@ -2,8 +2,8 @@ package net.ccbluex.liquidbounce.features.module.modules.movement.flights.zonecr
 
 import net.ccbluex.liquidbounce.event.MoveEvent
 import net.ccbluex.liquidbounce.features.module.modules.movement.flights.FlightMode
-import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.features.value.BoolValue
+import net.ccbluex.liquidbounce.utils.MovementUtils
 
 class ZoneCraftFlight : FlightMode("ZoneCraft") {
     private val timerBoostValue = BoolValue("${valuePrefix}TimerBoost", false)

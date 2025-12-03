@@ -2,7 +2,7 @@ package net.ccbluex.liquidbounce.file.config
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-
+import net.ccbluex.liquidbounce.CrossSine
 import net.ccbluex.liquidbounce.features.module.modules.world.Target
 import net.ccbluex.liquidbounce.features.value.*
 import net.ccbluex.liquidbounce.file.FileManager
@@ -15,7 +15,6 @@ import java.io.File
 import java.nio.file.Files
 import java.util.*
 import kotlin.concurrent.schedule
-import net.ccbluex.liquidbounce.CrossSine
 
 class ConfigManager {
     private val configSetFile = File(CrossSine.fileManager.dir, "config-settings.json")

@@ -1,9 +1,7 @@
 package net.ccbluex.liquidbounce.ui.client.altmanager
 
-import net.ccbluex.liquidbounce.CrossSine
-
 import me.liuli.elixir.account.MinecraftAccount
-
+import net.ccbluex.liquidbounce.CrossSine
 import net.ccbluex.liquidbounce.event.SessionEvent
 import net.ccbluex.liquidbounce.ui.client.altmanager.sub.GuiAdd
 import net.ccbluex.liquidbounce.ui.client.altmanager.sub.GuiDirectLogin

@@ -1,6 +1,5 @@
 package net.ccbluex.liquidbounce.features.module.modules.other.hackercheck;
 
-import net.ccbluex.liquidbounce.event.PacketEvent;
 import net.ccbluex.liquidbounce.utils.ClientUtils;
 import net.ccbluex.liquidbounce.utils.MinecraftInstance;
 import net.minecraft.client.entity.EntityOtherPlayerMP;

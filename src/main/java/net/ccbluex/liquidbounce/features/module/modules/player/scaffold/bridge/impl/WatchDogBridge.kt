@@ -1,14 +1,13 @@
 package net.ccbluex.liquidbounce.features.module.modules.player.scaffold.bridge.impl
 
+import net.ccbluex.liquidbounce.features.module.modules.movement.Speed
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldConstants.JUMP_MOTION_ALT
 import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.bridge.BridgeMode
-import net.ccbluex.liquidbounce.features.module.modules.movement.Speed
 import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.utils.PlayerUtils
 import net.ccbluex.liquidbounce.utils.block.BlockUtils
 import net.minecraft.block.BlockAir
 import net.minecraft.client.Minecraft
-import net.minecraft.client.settings.GameSettings
 import net.minecraft.util.BlockPos
 
 

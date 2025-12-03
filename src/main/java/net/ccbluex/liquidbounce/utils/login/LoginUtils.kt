@@ -1,10 +1,8 @@
 
 package net.ccbluex.liquidbounce.utils.login
 
-import net.ccbluex.liquidbounce.CrossSine
-
 import me.liuli.elixir.account.CrackedAccount
-
+import net.ccbluex.liquidbounce.CrossSine
 import net.ccbluex.liquidbounce.event.SessionEvent
 import net.ccbluex.liquidbounce.utils.MinecraftInstance
 import net.ccbluex.liquidbounce.utils.misc.RandomUtils

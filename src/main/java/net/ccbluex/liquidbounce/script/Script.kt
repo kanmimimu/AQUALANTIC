@@ -7,7 +7,8 @@ import jdk.nashorn.api.scripting.ScriptUtils
 import net.ccbluex.liquidbounce.CrossSine
 import net.ccbluex.liquidbounce.features.command.Command
 import net.ccbluex.liquidbounce.features.module.Module
-import net.ccbluex.liquidbounce.script.api.*
+import net.ccbluex.liquidbounce.script.api.ScriptCommand
+import net.ccbluex.liquidbounce.script.api.ScriptModule
 import net.ccbluex.liquidbounce.script.api.global.Chat
 import net.ccbluex.liquidbounce.script.api.global.Notifications
 import net.ccbluex.liquidbounce.script.api.global.Setting

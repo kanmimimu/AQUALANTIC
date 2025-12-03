@@ -2,10 +2,9 @@ package net.ccbluex.liquidbounce.file.config.sections
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-
+import net.ccbluex.liquidbounce.CrossSine
 import net.ccbluex.liquidbounce.features.macro.Macro
 import net.ccbluex.liquidbounce.file.config.ConfigSection
-import net.ccbluex.liquidbounce.CrossSine
 
 class MacrosSection : ConfigSection("macros") {
     override fun load(json: JsonObject) {

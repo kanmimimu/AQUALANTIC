@@ -1,10 +1,8 @@
 package net.ccbluex.liquidbounce.file.configs
 
-import net.ccbluex.liquidbounce.CrossSine
-
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-
+import net.ccbluex.liquidbounce.CrossSine
 import net.ccbluex.liquidbounce.features.special.AutoReconnect
 import net.ccbluex.liquidbounce.file.FileConfig
 import net.ccbluex.liquidbounce.file.FileManager

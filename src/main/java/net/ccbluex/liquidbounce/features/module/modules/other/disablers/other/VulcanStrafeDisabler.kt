@@ -6,8 +6,8 @@ import net.ccbluex.liquidbounce.features.module.modules.other.disablers.Disabler
 import net.ccbluex.liquidbounce.features.value.BoolValue
 import net.ccbluex.liquidbounce.features.value.IntegerValue
 import net.ccbluex.liquidbounce.utils.PacketUtils
-import net.minecraft.network.play.client.C07PacketPlayerDigging
 import net.minecraft.network.play.client.C03PacketPlayer
+import net.minecraft.network.play.client.C07PacketPlayerDigging
 import net.minecraft.util.BlockPos
 import net.minecraft.util.EnumFacing
 

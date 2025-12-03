@@ -1,10 +1,8 @@
  
 package net.ccbluex.liquidbounce.features.command.commands
 
-import net.ccbluex.liquidbounce.CrossSine
-
 import joptsimple.internal.Strings
-
+import net.ccbluex.liquidbounce.CrossSine
 import net.ccbluex.liquidbounce.features.command.Command
 import net.ccbluex.liquidbounce.utils.ClientUtils
 

@@ -2,7 +2,6 @@ package net.ccbluex.liquidbounce.features.module.modules.other.disablers.server
 
 
 import net.ccbluex.liquidbounce.event.*
-import net.ccbluex.liquidbounce.features.module.ModuleManager
 import net.ccbluex.liquidbounce.features.module.modules.other.disablers.DisablerMode
 import net.ccbluex.liquidbounce.utils.BarProgress
 import net.ccbluex.liquidbounce.utils.MovementUtils

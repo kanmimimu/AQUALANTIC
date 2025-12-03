@@ -5,12 +5,12 @@ import net.ccbluex.liquidbounce.CrossSine;
 import net.ccbluex.liquidbounce.features.module.Module;
 import net.ccbluex.liquidbounce.features.module.ModuleCategory;
 import net.ccbluex.liquidbounce.ui.client.gui.ClickGUIModule;
+import net.ccbluex.liquidbounce.ui.client.gui.GuiClientSettings;
 import net.ccbluex.liquidbounce.ui.client.gui.clickgui.elements.ButtonElement;
 import net.ccbluex.liquidbounce.ui.client.gui.clickgui.elements.Element;
 import net.ccbluex.liquidbounce.ui.client.gui.clickgui.elements.ModuleElement;
 import net.ccbluex.liquidbounce.ui.client.gui.clickgui.style.Style;
 import net.ccbluex.liquidbounce.ui.client.gui.clickgui.style.styles.LiquidBounceStyle;
-import net.ccbluex.liquidbounce.ui.client.gui.GuiClientSettings;
 import net.ccbluex.liquidbounce.ui.client.hud.designer.GuiHudDesigner;
 import net.ccbluex.liquidbounce.ui.font.AWTFontRenderer;
 import net.ccbluex.liquidbounce.utils.render.EaseUtils;
@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static net.ccbluex.liquidbounce.utils.render.RenderUtils.drawImage;
 
 public class ClickGui extends GuiScreen {
 

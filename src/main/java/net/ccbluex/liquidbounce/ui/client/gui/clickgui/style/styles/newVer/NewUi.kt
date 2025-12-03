@@ -1,14 +1,13 @@
 package net.ccbluex.liquidbounce.ui.client.gui.clickgui.style.styles.newVer
 
+
 import net.ccbluex.liquidbounce.CrossSine
-
-
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.ui.client.gui.ClickGUIModule
+import net.ccbluex.liquidbounce.ui.client.gui.GuiClientSettings
 import net.ccbluex.liquidbounce.ui.client.gui.clickgui.style.styles.newVer.element.CategoryElement
 import net.ccbluex.liquidbounce.ui.client.gui.clickgui.style.styles.newVer.element.SearchElement
 import net.ccbluex.liquidbounce.ui.client.gui.colortheme.ClientTheme
-import net.ccbluex.liquidbounce.ui.client.gui.GuiClientSettings
 import net.ccbluex.liquidbounce.ui.client.hud.designer.GuiHudDesigner
 import net.ccbluex.liquidbounce.ui.font.Fonts
 import net.ccbluex.liquidbounce.utils.AnimationUtils

@@ -1,7 +1,6 @@
 package net.ccbluex.liquidbounce.utils.shader
 
 import net.ccbluex.liquidbounce.utils.MinecraftInstance
-import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL20
 import java.io.InputStreamReader
 

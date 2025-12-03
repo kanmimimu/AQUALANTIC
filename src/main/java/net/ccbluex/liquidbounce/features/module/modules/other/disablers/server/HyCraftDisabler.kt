@@ -4,8 +4,8 @@ import net.ccbluex.liquidbounce.event.PacketEvent
 import net.ccbluex.liquidbounce.features.module.modules.other.disablers.DisablerMode
 import net.ccbluex.liquidbounce.features.value.BoolValue
 import net.minecraft.network.play.client.C03PacketPlayer
-import net.minecraft.network.play.server.S3EPacketTeams
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
+import net.minecraft.network.play.server.S3EPacketTeams
 
 class HyCraftDisabler : DisablerMode("HyCraftCrash") {
     private val invalidTeams = BoolValue("${valuePrefix}BlockTeams", false)

@@ -5,11 +5,11 @@ import net.ccbluex.liquidbounce.features.module.modules.other.disablers.Disabler
 import net.ccbluex.liquidbounce.features.value.BoolValue
 import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.minecraft.network.play.client.C00PacketKeepAlive
-import net.minecraft.network.play.client.C0FPacketConfirmTransaction
-import net.minecraft.network.play.client.C0APacketAnimation
-import net.minecraft.network.play.client.C0BPacketEntityAction
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C03PacketPlayer.*
+import net.minecraft.network.play.client.C0APacketAnimation
+import net.minecraft.network.play.client.C0BPacketEntityAction
+import net.minecraft.network.play.client.C0FPacketConfirmTransaction
 
 class BasicDisabler : DisablerMode("Basic") {
     private val cancelC00Value = BoolValue("${valuePrefix}CancelC00", true)

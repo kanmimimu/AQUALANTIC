@@ -1,8 +1,5 @@
 package net.ccbluex.liquidbounce.utils
 
-import net.ccbluex.liquidbounce.event.EventTarget
-import net.ccbluex.liquidbounce.event.Listenable
-import net.ccbluex.liquidbounce.event.UpdateEvent
 import net.ccbluex.liquidbounce.features.module.modules.visual.Animations
 import net.ccbluex.liquidbounce.utils.MinecraftInstance.mc
 import net.minecraft.block.BlockSlime

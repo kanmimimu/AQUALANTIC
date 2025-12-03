@@ -1,14 +1,12 @@
 package net.ccbluex.liquidbounce.ui.client.gui.colortheme
 
 import net.ccbluex.liquidbounce.CrossSine
-
 import net.ccbluex.liquidbounce.features.module.modules.visual.CustomClientColor
 import net.ccbluex.liquidbounce.features.value.BoolValue
 import net.ccbluex.liquidbounce.features.value.IntegerValue
 import net.ccbluex.liquidbounce.features.value.ListValue
 import net.ccbluex.liquidbounce.utils.extensions.setAlpha
 import net.ccbluex.liquidbounce.utils.render.ColorUtils
-import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import java.awt.Color
 
 object ClientTheme {

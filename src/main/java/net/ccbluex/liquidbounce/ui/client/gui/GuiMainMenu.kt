@@ -5,7 +5,6 @@ import net.ccbluex.liquidbounce.ui.font.Fonts
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.ccbluex.liquidbounce.utils.shader.Shader
 import net.minecraft.client.gui.*
-import net.minecraft.client.renderer.GlStateManager
 import org.lwjgl.opengl.GL20
 import java.awt.Color
 

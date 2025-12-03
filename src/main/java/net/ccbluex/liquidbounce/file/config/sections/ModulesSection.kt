@@ -1,9 +1,7 @@
 package net.ccbluex.liquidbounce.file.config.sections
 
-import net.ccbluex.liquidbounce.CrossSine
-
 import com.google.gson.JsonObject
-
+import net.ccbluex.liquidbounce.CrossSine
 import net.ccbluex.liquidbounce.features.module.EnumAutoDisableType
 import net.ccbluex.liquidbounce.features.module.EnumTriggerType
 import net.ccbluex.liquidbounce.file.config.ConfigSection

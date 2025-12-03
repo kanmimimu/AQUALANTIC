@@ -9,8 +9,8 @@ import net.ccbluex.liquidbounce.features.value.IntegerValue
 import net.ccbluex.liquidbounce.utils.BlinkUtils
 import net.ccbluex.liquidbounce.utils.PacketUtils
 import net.ccbluex.liquidbounce.utils.timer.MSTimer
-import net.minecraft.network.play.client.C0FPacketConfirmTransaction
 import net.minecraft.network.play.client.C0BPacketEntityAction
+import net.minecraft.network.play.client.C0FPacketConfirmTransaction
 import kotlin.random.Random
 
 class VulcanCombatDisabler : DisablerMode("VulcanCombat") {

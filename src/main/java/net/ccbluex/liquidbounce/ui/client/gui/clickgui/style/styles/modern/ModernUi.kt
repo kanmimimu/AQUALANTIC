@@ -1,20 +1,15 @@
 package net.ccbluex.liquidbounce.ui.client.gui.clickgui.style.styles.modern
 
-import net.ccbluex.liquidbounce.CrossSine
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.ui.client.gui.clickgui.style.styles.modern.element.ModernCategoryElement
-import net.ccbluex.liquidbounce.ui.client.gui.colortheme.ClientTheme
 import net.ccbluex.liquidbounce.ui.font.Fonts
 import net.ccbluex.liquidbounce.utils.render.EaseUtils
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.GuiTextField
-import net.minecraft.client.renderer.GlStateManager
 import org.lwjgl.input.Keyboard
-import org.lwjgl.input.Mouse
 import org.lwjgl.opengl.GL11
 import java.awt.Color
-import java.io.IOException
 
 class ModernUi : GuiScreen() {
     private val categoryElements: MutableList<ModernCategoryElement> = ArrayList()
