@@ -16,6 +16,7 @@ import net.ccbluex.liquidbounce.ui.client.gui.clickgui.style.styles.LiquidBounce
 import net.ccbluex.liquidbounce.ui.client.gui.clickgui.style.styles.astolfo.AstolfoClickGui;
 import net.ccbluex.liquidbounce.ui.client.gui.clickgui.style.styles.modern.ModernUi;
 import net.ccbluex.liquidbounce.ui.client.gui.clickgui.style.styles.newVer.NewUi;
+import net.ccbluex.liquidbounce.ui.client.gui.clickgui.style.styles.material3.MaterialDesign3Gui;
 import net.ccbluex.liquidbounce.ui.client.gui.colortheme.ClientTheme;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2EPacketCloseWindow;
@@ -25,8 +26,9 @@ import java.awt.*;
 
 @ModuleInfo(name = "ClickGUI", category = ModuleCategory.VISUAL, keyBind = Keyboard.KEY_RSHIFT, canEnable = false)
 public class ClickGUIModule extends Module {
-    public ListValue styleValue = new ListValue("Style", new String[] { "LB+", "LiquidBounce", "Astolfo", "Modern" },
-            "Modern") {
+    public ListValue styleValue = new ListValue("Style",
+            new String[] { "LB+", "LiquidBounce", "Astolfo", "Modern", "Material3" },
+            "Material3") {
         @Override
         protected void onChanged(final String oldValue, final String newValue) {
             updateStyle();
@@ -57,6 +59,9 @@ public class ClickGUIModule extends Module {
             this.setState(false);
         } else if (styleValue.get().equalsIgnoreCase("Modern")) {
             mc.displayGuiScreen(ModernUi.Companion.getInstance());
+            this.setState(false);
+        } else if (styleValue.get().equalsIgnoreCase("Material3")) {
+            mc.displayGuiScreen(MaterialDesign3Gui.Companion.getInstance());
             this.setState(false);
         } else {
             updateStyle();
