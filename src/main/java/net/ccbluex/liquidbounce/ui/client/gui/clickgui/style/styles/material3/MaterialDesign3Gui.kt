@@ -3,361 +3,330 @@ package net.ccbluex.liquidbounce.ui.client.gui.clickgui.style.styles.material3
 import net.ccbluex.liquidbounce.CrossSine
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.ui.client.gui.ClickGUIModule
+import net.ccbluex.liquidbounce.ui.client.gui.GuiClientSettings
+import net.ccbluex.liquidbounce.ui.client.gui.clickgui.style.styles.newVer.IconManager
+import net.ccbluex.liquidbounce.ui.client.gui.colortheme.ClientTheme
+import net.ccbluex.liquidbounce.ui.client.hud.designer.GuiHudDesigner
 import net.ccbluex.liquidbounce.ui.font.Fonts
+import net.ccbluex.liquidbounce.utils.AnimationUtils
+import net.ccbluex.liquidbounce.utils.MouseUtils
 import net.ccbluex.liquidbounce.utils.render.EaseUtils
 import net.ccbluex.liquidbounce.utils.render.RenderUtils
+import net.ccbluex.liquidbounce.utils.render.Stencil
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.GuiTextField
+import net.minecraft.client.renderer.GlStateManager
 import org.lwjgl.input.Keyboard
+import org.lwjgl.input.Mouse
 import org.lwjgl.opengl.GL11
 import java.awt.Color
 
-/**
- * Material Design 3 ClickGUI
- * Auto-resizing, global search, no dragging
- */
 class MaterialDesign3Gui : GuiScreen() {
     
-    // Layout - computed dynamically
-    private var windowWidth = 0f
-    private var windowHeight = 0f
-    private var windowX = 0f
-    private var windowY = 0f
-    private val margin = 40f  // Margin from screen edges
+    private val categoryElements = mutableListOf<M3CategoryElement>()
     
-    // Categories
-    private val categoryItems = ModuleCategory.values().map { M3CategoryItem(it) }
+    private var windowXStart = 0f
+    private var windowYStart = 0f
+    private var windowXEnd = 0f
+    private var windowYEnd = 0f
     
-    // State
+    private val windowWidth get() = windowXEnd - windowXStart
+    private val windowHeight get() = windowYEnd - windowYStart
+    
+    private val margin = 40f
+    private val maxWidth = 600f
+    private val maxHeight = 450f
+    
+    private var sideWidth = 100f
+    
+    private var searchElement: M3SearchElement? = null
+    
+    private var closed = false
     private var animProgress = 0f
-    private var closing = false
     
-    // Search
-    private var searchField: GuiTextField? = null
-    private var searchQuery = ""
-    
-    // Global search results
-    private var searchResultModules = mutableListOf<M3ModuleCard>()
-    private var isSearching = false
+    private var startYAnim = 0f
+    private var endYAnim = 0f
     
     init {
-        if (categoryItems.isNotEmpty()) {
-            categoryItems[0].selected = true
+        ModuleCategory.values().forEach { categoryElements.add(M3CategoryElement(it)) }
+        if (categoryElements.isNotEmpty()) {
+            categoryElements[0].focused = true
         }
     }
     
     override fun initGui() {
         super.initGui()
+        Keyboard.enableRepeatEvents(true)
         
-        // Auto-size window with margins
-        windowWidth = (width - margin * 2).coerceAtMost(600f)
-        windowHeight = (height - margin * 2).coerceAtMost(450f)
-        windowX = (width - windowWidth) / 2
-        windowY = (height - windowHeight) / 2
+        val calcWidth = (width - margin * 2).coerceAtMost(maxWidth)
+        val calcHeight = (height - margin * 2).coerceAtMost(maxHeight)
+        windowXStart = (width - calcWidth) / 2
+        windowYStart = (height - calcHeight) / 2
+        windowXEnd = windowXStart + calcWidth
+        windowYEnd = windowYStart + calcHeight
         
-        // Initialize search field
-        searchField = GuiTextField(0, mc.fontRendererObj, 0, 0, 200, 20).apply {
-            maxStringLength = 50
-            enableBackgroundDrawing = false
+        searchElement = M3SearchElement(
+            windowXStart + 8f,
+            windowYStart + 30f,
+            sideWidth - 16f,
+            20f
+        )
+        
+        categoryElements.forEach { cat ->
+            cat.moduleElements.filter { it.listeningKeybind() }.forEach { it.resetState() }
         }
-        
+    }
+    
+    override fun onGuiClosed() {
+        categoryElements.filter { it.focused }.forEach { 
+            it.handleMouseRelease(-1, -1, 0, 0f, 0f, 0f, 0f) 
+        }
+        closed = false
         animProgress = 0f
-        closing = false
+        Keyboard.enableRepeatEvents(false)
+        CrossSine.fileManager.saveConfigs()
     }
     
     override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
-        // Animation
-        if (closing) {
-            animProgress -= 0.04f
-            if (animProgress <= 0f) {
-                mc.displayGuiScreen(null)
-                return
-            }
-        } else {
-            animProgress += 0.06f
-            if (animProgress > 1f) animProgress = 1f
+        animProgress += (0.0075f * 0.25f * RenderUtils.deltaTime * if (closed) -1f else 1f)
+        animProgress = animProgress.coerceIn(0f, 1f)
+        
+        if (closed && animProgress == 0f) {
+            mc.displayGuiScreen(null)
+            return
         }
         
-        val scale = EaseUtils.easeOutBack(animProgress.toDouble()).toFloat().coerceIn(0.01f, 1f)
-        
-        // Draw dimmed background
-        drawDefaultBackground()
+        val percent = EaseUtils.easeOutBack(animProgress.toDouble()).toFloat()
         
         GL11.glPushMatrix()
+        if (!ClickGUIModule.fastRenderValue.get()) {
+            GL11.glScalef(percent, percent, percent)
+            GL11.glTranslatef(
+                ((windowXEnd * 0.5f * (1 - percent)) / percent),
+                ((windowYEnd * 0.5f * (1 - percent)) / percent),
+                0f
+            )
+        }
         
-        // Scale animation from center
-        val centerX = windowX + windowWidth / 2
-        val centerY = windowY + windowHeight / 2
-        GL11.glTranslatef(centerX, centerY, 0f)
-        GL11.glScalef(scale, scale, 1f)
-        GL11.glTranslatef(-centerX, -centerY, 0f)
+        drawFullSized(mouseX, mouseY, partialTicks)
         
-        // Main window background
+        GL11.glPopMatrix()
+    }
+    
+    private fun drawFullSized(mouseX: Int, mouseY: Int, partialTicks: Float) {
+        val accentColor = ClientTheme.getColor(1)
+        
         RenderUtils.drawRoundedRect(
-            windowX, windowY,
-            windowX + windowWidth, windowY + windowHeight,
+            windowXStart, windowYStart,
+            windowXEnd, windowYEnd,
             M3Dimensions.cornerExtraLarge,
             M3Colors.surface.rgb
         )
         
-        // Navigation Rail background
-        val navRailWidth = M3Dimensions.navRailWidth
         RenderUtils.customRounded(
-            windowX, windowY,
-            windowX + navRailWidth, windowY + windowHeight,
+            windowXStart, windowYStart,
+            windowXStart + sideWidth, windowYEnd,
             M3Dimensions.cornerExtraLarge, 0f, M3Dimensions.cornerExtraLarge, 0f,
             M3Colors.surfaceContainer.rgb
         )
         
-        // Draw title in nav rail
+        val xButtonHovered = mouseX.toFloat() in (windowXEnd - 24f)..windowXEnd && 
+                             mouseY.toFloat() in windowYStart..(windowYStart + 24f)
+        if (xButtonHovered) {
+            RenderUtils.customRounded(
+                windowXEnd - 24f, windowYStart,
+                windowXEnd, windowYStart + 24f,
+                0f, M3Dimensions.cornerExtraLarge, 0f, 0f,
+                M3Colors.errorContainer.rgb
+            )
+        }
+        GlStateManager.disableAlpha()
+        RenderUtils.drawImage(IconManager.removeIcon, (windowXEnd - 18f).toInt(), (windowYStart + 7f).toInt(), 10, 10)
+        RenderUtils.drawImage(IconManager.brush, (windowXStart + 6f).toInt(), (windowYEnd - 30f).toInt(), 24, 24)
+        RenderUtils.drawImage(IconManager.settings, (windowXStart + 6f).toInt(), (windowYEnd - 60f).toInt(), 24, 24)
+        GlStateManager.enableAlpha()
+        
+        searchElement?.let { search ->
+            search.xPos = windowXStart + 8f
+            search.yPos = windowYStart + 30f
+            search.width = sideWidth - 16f
+            
+            if (search.drawBox(mouseX, mouseY, accentColor)) {
+                search.drawPanel(
+                    mouseX, mouseY,
+                    windowXStart + sideWidth, windowYStart + 20f,
+                    windowWidth - sideWidth, windowHeight - 20f,
+                    Mouse.getDWheel(), categoryElements, accentColor
+                )
+                super.drawScreen(mouseX, mouseY, partialTicks)
+                return
+            }
+        }
+        
         Fonts.SFApple40.drawString(
-            "Settings",
-            windowX + 8,
-            windowY + 16,
+            categoryElements.find { it.focused }?.name ?: "Settings",
+            windowXStart + 8f, windowYStart + 8f,
             M3Colors.onSurface.rgb
         )
         
-        // Draw categories in nav rail
-        var categoryY = windowY + 50f
-        for (item in categoryItems) {
-            val itemHeight = item.draw(mouseX, mouseY, windowX, categoryY, navRailWidth)
-            categoryY += itemHeight
+        val elementsStartY = 55f
+        val elementHeight = 24f
+        var startY = windowYStart + elementsStartY
+        var lastFocusedYStart = 0f
+        var lastFocusedYEnd = 0f
+        
+        for (ce in categoryElements) {
+            ce.drawLabel(mouseX, mouseY, windowXStart, startY, sideWidth, elementHeight, accentColor)
+            if (ce.focused) {
+                lastFocusedYStart = startY + 4f
+                lastFocusedYEnd = startY + elementHeight - 4f
+                
+                startYAnim = if (ClickGUIModule.fastRenderValue.get()) {
+                    startY + 4f
+                } else {
+                    AnimationUtils.animate(
+                        startY + 4f, startYAnim,
+                        (if (startYAnim - (startY + 4f) > 0) 0.65f else 0.55f) * RenderUtils.deltaTime * 0.025f
+                    )
+                }
+                endYAnim = if (ClickGUIModule.fastRenderValue.get()) {
+                    startY + elementHeight - 4f
+                } else {
+                    AnimationUtils.animate(
+                        startY + elementHeight - 4f, endYAnim,
+                        (if (endYAnim - (startY + elementHeight - 4f) < 0) 0.65f else 0.55f) * RenderUtils.deltaTime * 0.025f
+                    )
+                }
+                
+                ce.drawPanel(
+                    mouseX, mouseY,
+                    windowXStart + sideWidth, windowYStart + 20f,
+                    windowWidth - sideWidth, windowHeight - 20f,
+                    Mouse.getDWheel(), accentColor
+                )
+            }
+            startY += elementHeight
         }
         
-        // Content area
-        val contentX = windowX + navRailWidth
-        val contentY = windowY
-        val contentWidth = windowWidth - navRailWidth
-        val contentHeight = windowHeight
-        
-        // Search bar
-        val searchBarX = contentX + M3Dimensions.spacingMd
-        val searchBarY = contentY + M3Dimensions.spacingMd
-        val searchBarWidth = contentWidth - M3Dimensions.spacingMd * 2
-        val searchBarHeight = 32f
-        
-        // Search bar background
         RenderUtils.drawRoundedRect(
-            searchBarX, searchBarY,
-            searchBarX + searchBarWidth, searchBarY + searchBarHeight,
-            searchBarHeight / 2,
-            M3Colors.surfaceContainerHigh.rgb
+            windowXStart + 4f, startYAnim,
+            windowXStart + 6f, endYAnim,
+            1f, accentColor.rgb
         )
-        
-        // Search icon
-        Fonts.SFApple35.drawString("🔍", searchBarX + 10, searchBarY + 10, M3Colors.onSurfaceVariant.rgb)
-        
-        // Search text
-        searchField?.let { field ->
-            field.xPosition = (searchBarX + 34).toInt()
-            field.yPosition = (searchBarY + 10).toInt()
-            field.width = (searchBarWidth - 50).toInt()
-            
-            val prevQuery = searchQuery
-            searchQuery = field.text
-            
-            // Update global search when query changes
-            if (searchQuery != prevQuery) {
-                updateGlobalSearch()
-            }
-            
-            if (field.text.isEmpty() && !field.isFocused) {
-                Fonts.SFApple35.drawString(
-                    "Search all modules...",
-                    searchBarX + 34, searchBarY + 10,
-                    M3Colors.onSurfaceVariant.rgb
-                )
-            } else {
-                Fonts.SFApple35.drawString(
-                    field.text,
-                    searchBarX + 34, searchBarY + 10,
-                    M3Colors.onSurface.rgb
-                )
-            }
-        }
-        
-        // Module list area
-        val moduleAreaY = searchBarY + searchBarHeight + M3Dimensions.spacingSm
-        val moduleAreaHeight = contentHeight - searchBarHeight - M3Dimensions.spacingMd * 2 - M3Dimensions.spacingSm
-        
-        // Draw modules based on search state
-        if (isSearching && searchQuery.isNotEmpty()) {
-            // Global search - draw from all categories
-            drawGlobalSearchResults(mouseX, mouseY, contentX, moduleAreaY, contentWidth, moduleAreaHeight)
-        } else {
-            // Normal mode - draw selected category
-            val selectedCategory = categoryItems.find { it.selected }
-            selectedCategory?.drawModules(
-                mouseX, mouseY,
-                contentX, moduleAreaY,
-                contentWidth, moduleAreaHeight,
-                ""  // No filter, we already handle search globally
-            )
-        }
-        
-        GL11.glPopMatrix()
         
         super.drawScreen(mouseX, mouseY, partialTicks)
     }
     
-    private fun updateGlobalSearch() {
-        isSearching = searchQuery.isNotEmpty()
-        if (isSearching) {
-            searchResultModules.clear()
-            for (category in categoryItems) {
-                searchResultModules.addAll(category.getModulesMatching(searchQuery))
+    override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
+        searchElement?.let { search ->
+            if (search.isTyping() && MouseUtils.mouseWithinBounds(mouseX, mouseY, windowXStart, windowYStart, windowXStart + 60f, windowYStart + 24f)) {
+                search.searchBox.text = ""
+                return
             }
         }
-    }
-    
-    private fun drawGlobalSearchResults(
-        mouseX: Int, mouseY: Int,
-        x: Float, y: Float,
-        width: Float, height: Float
-    ) {
-        if (searchResultModules.isEmpty()) {
-            Fonts.SFApple35.drawString(
-                "No modules found",
-                x + width / 2 - 40, y + 20,
-                M3Colors.onSurfaceVariant.rgb
-            )
+        
+        if (MouseUtils.mouseWithinBounds(mouseX, mouseY, windowXEnd - 24f, windowYStart, windowXEnd, windowYStart + 24f)) {
+            mc.displayGuiScreen(null)
             return
         }
         
-        // Simple scroll-less list for now
-        GL11.glPushMatrix()
-        RenderUtils.makeScissorBox(x, y, x + width, y + height)
-        GL11.glEnable(GL11.GL_SCISSOR_TEST)
-        
-        var currentY = y + M3Dimensions.spacingMd
-        for (module in searchResultModules.take(20)) {  // Limit visible
-            val cardHeight = module.getHeight()
-            if (currentY + cardHeight > y + height) break
-            
-            module.draw(mouseX, mouseY, x + M3Dimensions.spacingMd, currentY, width - M3Dimensions.spacingMd * 2)
-            currentY += cardHeight + M3Dimensions.spacingSm
+        if (MouseUtils.mouseWithinBounds(mouseX, mouseY, windowXStart, windowYEnd - 40f, windowXStart + 40f, windowYEnd)) {
+            mc.displayGuiScreen(GuiHudDesigner())
+            return
         }
         
-        GL11.glDisable(GL11.GL_SCISSOR_TEST)
-        GL11.glPopMatrix()
-    }
-    
-    override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
-        searchField?.mouseClicked(mouseX, mouseY, mouseButton)
+        if (MouseUtils.mouseWithinBounds(mouseX, mouseY, windowXStart, windowYEnd - 70f, windowXStart + 30f, windowYEnd - 30f)) {
+            mc.displayGuiScreen(GuiClientSettings(this))
+            return
+        }
         
-        // Check category clicks
-        val navRailWidth = M3Dimensions.navRailWidth
-        var categoryY = windowY + 50f
-        for (item in categoryItems) {
-            val itemHeight = M3Dimensions.navRailItemHeight
-            if (mouseX >= windowX && mouseX <= windowX + navRailWidth &&
-                mouseY >= categoryY && mouseY <= categoryY + itemHeight) {
-                if (mouseButton == 0) {
-                    categoryItems.forEach { it.selected = false }
-                    item.selected = true
-                    // Clear search when switching categories
-                    searchField?.text = ""
-                    searchQuery = ""
-                    isSearching = false
-                    return
+        val elementsStartY = 55f
+        val elementHeight = 24f
+        var startY = windowYStart + elementsStartY
+        
+        searchElement?.handleMouseClick(
+            mouseX, mouseY, mouseButton,
+            windowXStart + sideWidth, windowYStart + 20f,
+            windowWidth - sideWidth, windowHeight - 20f,
+            categoryElements
+        )
+        
+        if (searchElement?.isTyping() != true) {
+            categoryElements.forEach { cat ->
+                if (cat.focused) {
+                    cat.handleMouseClick(
+                        mouseX, mouseY, mouseButton,
+                        windowXStart + sideWidth, windowYStart + 20f,
+                        windowWidth - sideWidth, windowHeight - 20f
+                    )
                 }
-            }
-            categoryY += itemHeight
-        }
-        
-        // Module area
-        val contentX = windowX + navRailWidth
-        val contentY = windowY
-        val contentWidth = windowWidth - navRailWidth
-        val contentHeight = windowHeight
-        
-        val searchBarHeight = 32f
-        val moduleAreaY = contentY + M3Dimensions.spacingMd + searchBarHeight + M3Dimensions.spacingSm
-        val moduleAreaHeight = contentHeight - searchBarHeight - M3Dimensions.spacingMd * 2 - M3Dimensions.spacingSm
-        
-        if (isSearching && searchQuery.isNotEmpty()) {
-            // Handle clicks on global search results
-            var currentY = moduleAreaY + M3Dimensions.spacingMd
-            for (module in searchResultModules.take(20)) {
-                val cardHeight = module.getHeight()
-                val cardX = contentX + M3Dimensions.spacingMd
-                val cardWidth = contentWidth - M3Dimensions.spacingMd * 2
                 
-                if (mouseX >= cardX && mouseX <= cardX + cardWidth &&
-                    mouseY >= currentY && mouseY <= currentY + cardHeight) {
-                    module.mouseClicked(mouseX, mouseY, mouseButton, cardX, currentY, cardWidth)
+                if (MouseUtils.mouseWithinBounds(mouseX, mouseY, windowXStart, startY, windowXStart + sideWidth, startY + elementHeight) && searchElement?.isTyping() != true) {
+                    categoryElements.forEach { it.focused = false }
+                    cat.focused = true
                     return
                 }
-                currentY += cardHeight + M3Dimensions.spacingSm
+                startY += elementHeight
             }
-        } else {
-            val selectedCategory = categoryItems.find { it.selected }
-            selectedCategory?.mouseClicked(
-                mouseX, mouseY, mouseButton,
-                contentX, moduleAreaY,
-                contentWidth, moduleAreaHeight,
-                ""
-            )
         }
         
         super.mouseClicked(mouseX, mouseY, mouseButton)
     }
     
     override fun mouseReleased(mouseX: Int, mouseY: Int, state: Int) {
-        categoryItems.forEach { it.mouseReleased(mouseX, mouseY, state) }
-        searchResultModules.forEach { it.mouseReleased() }
+        searchElement?.handleMouseRelease(
+            mouseX, mouseY, state,
+            windowXStart + sideWidth, windowYStart + 20f,
+            windowWidth - sideWidth, windowHeight - 20f,
+            categoryElements
+        )
+        
+        if (searchElement?.isTyping() != true) {
+            categoryElements.filter { it.focused }.forEach { cat ->
+                cat.handleMouseRelease(
+                    mouseX, mouseY, state,
+                    windowXStart + sideWidth, windowYStart + 20f,
+                    windowWidth - sideWidth, windowHeight - 20f
+                )
+            }
+        }
+        
         super.mouseReleased(mouseX, mouseY, state)
     }
     
     override fun keyTyped(typedChar: Char, keyCode: Int) {
-        // Handle search field
-        if (searchField?.isFocused == true) {
-            searchField?.textboxKeyTyped(typedChar, keyCode)
-            if (keyCode == Keyboard.KEY_ESCAPE) {
-                searchField?.isFocused = false
-            }
+        if (keyCode == Keyboard.KEY_ESCAPE && !cant) {
+            closed = true
+            if (ClickGUIModule.fastRenderValue.get()) mc.displayGuiScreen(null)
             return
         }
         
-        // Handle value controls
-        if (isSearching) {
-            for (module in searchResultModules) {
-                if (module.keyTyped(typedChar, keyCode)) return
-            }
-        } else {
-            val selectedCategory = categoryItems.find { it.selected }
-            if (selectedCategory?.keyTyped(typedChar, keyCode) == true) {
+        categoryElements.filter { it.focused }.forEach { cat ->
+            if (cat.handleKeyTyped(typedChar, keyCode)) return
+        }
+        
+        searchElement?.let { search ->
+            if (search.handleTyping(typedChar, keyCode, windowXStart + sideWidth, windowYStart + 20f, windowWidth - sideWidth, windowHeight - 20f, categoryElements)) {
                 return
             }
-        }
-        
-        // Close on ESC
-        if (keyCode == Keyboard.KEY_ESCAPE) {
-            closing = true
-            return
         }
         
         super.keyTyped(typedChar, keyCode)
     }
     
-    override fun onGuiClosed() {
-        CrossSine.fileManager.saveConfig(CrossSine.clickGuiConfig)
-    }
+    override fun doesGuiPauseGame() = false
     
-    override fun doesGuiPauseGame(): Boolean = false
+    var cant = false
     
     companion object {
         private var instance: MaterialDesign3Gui? = null
         
         fun getInstance(): MaterialDesign3Gui {
-            if (instance == null) {
-                instance = MaterialDesign3Gui()
-            }
-            return instance!!
+            return instance ?: MaterialDesign3Gui().also { instance = it }
         }
         
         fun resetInstance() {
-            instance = null
+            instance = MaterialDesign3Gui()
         }
     }
 }
