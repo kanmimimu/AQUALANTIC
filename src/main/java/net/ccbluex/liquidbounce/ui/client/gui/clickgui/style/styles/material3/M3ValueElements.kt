@@ -83,93 +83,101 @@ class M3BoolElement(private val boolValue: BoolValue) : M3ValueElement<Boolean>(
 }
 
 class M3ListElement(private val listValue: ListValue) : M3ValueElement<String>(listValue) {
-    override val valueHeight = 28f
+    private var expandHeight = 0f
     private var expanded = false
-    private var expandAnim = 0f
+    
+    private val unusedValues: List<String>
+        get() = listValue.values.filter { it != listValue.get() }
+    
+    override val valueHeight: Float
+        get() = 24f + expandHeight
     
     override fun drawElement(mouseX: Int, mouseY: Int, x: Float, y: Float, width: Float, bgColor: Color, accentColor: Color): Float {
-        expandAnim = animSmooth(expandAnim, if (expanded) 1f else 0f, 0.4f)
-        
-        val currentValue = listValue.get()
-        val valueWidth = Fonts.SFApple35.getStringWidth(currentValue) + 20f
+        val targetHeight = if (expanded) 20f * unusedValues.size else 0f
+        expandHeight = animSmooth(expandHeight, targetHeight, 0.4f)
+        val percent = if (targetHeight > 0) expandHeight / targetHeight else 0f
         
         Fonts.SFApple35.drawString(
             listValue.name,
-            x + 8f, y + valueHeight / 2f - 4f,
+            x + 8f, y + 12f - Fonts.SFApple35.FONT_HEIGHT / 2f,
             M3Colors.onSurfaceVariant.rgb
         )
         
-        val chipX = x + width - valueWidth - 8f
-        val chipY = y + 4f
-        val chipHeight = valueHeight - 8f
+        val maxSubWidth = unusedValues.maxOfOrNull { Fonts.SFApple35.getStringWidth(it) }?.toFloat() ?: 50f
+        val boxWidth = maxSubWidth + 28f
+        val boxX = x + width - boxWidth - 8f
         
         RenderUtils.drawRoundedRect(
-            chipX, chipY, 
-            chipX + valueWidth, chipY + chipHeight,
-            M3Dimensions.cornerSmall,
-            M3Colors.secondaryContainer.rgb
+            boxX, y + 2f,
+            x + width - 8f, y + 22f + expandHeight,
+            6f,
+            M3Colors.surfaceContainerHigh.rgb
         )
         
         Fonts.SFApple35.drawString(
-            currentValue,
-            chipX + 8f, chipY + chipHeight / 2f - 4f,
-            M3Colors.onSecondaryContainer.rgb
+            listValue.get(),
+            boxX + 8f, y + 12f - Fonts.SFApple35.FONT_HEIGHT / 2f,
+            accentColor.rgb
         )
         
         val arrow = if (expanded) "▲" else "▼"
-        Fonts.SFApple24.drawString(arrow, chipX + valueWidth - 14f, chipY + chipHeight / 2f - 3f, M3Colors.onSecondaryContainer.rgb)
+        Fonts.SFApple24.drawString(
+            arrow,
+            x + width - 20f, y + 12f - 4f,
+            M3Colors.onSurfaceVariant.rgb
+        )
         
-        if (expandAnim > 0.01f) {
-            var optionY = y + valueHeight
-            for (option in listValue.values) {
-                if (option == currentValue) continue
-                
-                val optionHeight = 22f * expandAnim
-                val isHovered = MouseUtils.mouseWithinBounds(mouseX, mouseY, chipX, optionY, chipX + valueWidth, optionY + optionHeight)
+        if (percent > 0.01f) {
+            var vertOffset = 0f
+            for (subV in unusedValues) {
+                val optionY = y + 22f + vertOffset
+                val isHovered = MouseUtils.mouseWithinBounds(
+                    mouseX, mouseY,
+                    boxX, optionY,
+                    x + width - 8f, optionY + 20f * percent
+                )
                 
                 if (isHovered) {
                     RenderUtils.drawRoundedRect(
-                        chipX, optionY,
-                        chipX + valueWidth, optionY + optionHeight,
-                        M3Dimensions.cornerSmall,
-                        M3Colors.withAlpha(M3Colors.primaryContainer, (180 * expandAnim).toInt()).rgb
+                        boxX + 2f, optionY + 1f,
+                        x + width - 10f, optionY + 20f * percent - 1f,
+                        4f,
+                        M3Colors.withAlpha(M3Colors.onSurface, (20 * percent).toInt()).rgb
                     )
                 }
                 
                 Fonts.SFApple35.drawString(
-                    option,
-                    chipX + 8f, optionY + optionHeight / 2f - 4f * expandAnim,
-                    M3Colors.withAlpha(M3Colors.onSurfaceVariant, (255 * expandAnim).toInt()).rgb
+                    subV,
+                    boxX + 8f, optionY + 10f * percent - Fonts.SFApple35.FONT_HEIGHT / 2f,
+                    M3Colors.withAlpha(M3Colors.onSurfaceVariant, (255 * percent).toInt()).rgb
                 )
-                
-                optionY += optionHeight
+                vertOffset += 20f * percent
             }
         }
         
-        return valueHeight + (listValue.values.size - 1) * 22f * expandAnim
+        return 24f + expandHeight
     }
     
     override fun onClick(mouseX: Int, mouseY: Int, x: Float, y: Float, width: Float) {
-        val currentValue = listValue.get()
-        val valueWidth = Fonts.SFApple35.getStringWidth(currentValue) + 20f
-        val chipX = x + width - valueWidth - 8f
+        val maxSubWidth = unusedValues.maxOfOrNull { Fonts.SFApple35.getStringWidth(it) }?.toFloat() ?: 50f
+        val boxWidth = maxSubWidth + 28f
+        val boxX = x + width - boxWidth - 8f
         
-        if (MouseUtils.mouseWithinBounds(mouseX, mouseY, chipX, y, chipX + valueWidth, y + valueHeight)) {
+        if (MouseUtils.mouseWithinBounds(mouseX, mouseY, boxX, y + 2f, x + width - 8f, y + 22f)) {
             expanded = !expanded
             return
         }
         
         if (expanded) {
-            var optionY = y + valueHeight
-            for (option in listValue.values) {
-                if (option == currentValue) continue
-                val optionHeight = 22f * expandAnim
-                if (MouseUtils.mouseWithinBounds(mouseX, mouseY, chipX, optionY, chipX + valueWidth, optionY + optionHeight)) {
-                    listValue.set(option)
+            var vertOffset = 0f
+            for (subV in unusedValues) {
+                val optionY = y + 22f + vertOffset
+                if (MouseUtils.mouseWithinBounds(mouseX, mouseY, boxX, optionY, x + width - 8f, optionY + 20f)) {
+                    listValue.set(subV)
                     expanded = false
                     return
                 }
-                optionY += optionHeight
+                vertOffset += 20f
             }
         }
     }

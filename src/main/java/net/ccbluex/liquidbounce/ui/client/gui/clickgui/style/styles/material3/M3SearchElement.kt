@@ -20,33 +20,49 @@ class M3SearchElement(var xPos: Float, var yPos: Float, var width: Float, val he
     private var lastHeight = 0f
     private val startYY = 5f
     
-    val searchBox = M3SearchBox(0, xPos.toInt() + 2, yPos.toInt() + 2, width.toInt() - 4, height.toInt() - 2)
+    val searchBox = M3SearchBox(0, xPos.toInt() + 20, yPos.toInt() + 2, width.toInt() - 24, height.toInt() - 4)
     
     fun drawBox(mouseX: Int, mouseY: Int, accentColor: Color): Boolean {
-        Stencil.write(true)
+        searchBox.xPosition = (xPos + 20f).toInt()
+        searchBox.yPosition = (yPos + (height - 8f) / 2f).toInt()
+        searchBox.width = (width - 24f).toInt()
+        
         RenderUtils.drawRoundedRect(
             xPos, yPos, 
             xPos + width, yPos + height, 
-            M3Dimensions.cornerSmall, 
-            M3Colors.surfaceContainerHigh.rgb
+            height / 2f,
+            M3Colors.surfaceContainerHighest.rgb
         )
-        Stencil.erase(true)
+        
+        GlStateManager.disableAlpha()
+        RenderUtils.drawImage2(IconManager.search, xPos + 6f, yPos + (height - 10f) / 2f, 10, 10)
+        GlStateManager.enableAlpha()
         
         if (searchBox.isFocused) {
-            RenderUtils.newDrawRect(xPos, yPos + height - 1f, xPos + width, yPos + height, accentColor.rgb)
+            RenderUtils.drawRoundedRect(
+                xPos - 1f, yPos - 1f, 
+                xPos + width + 1f, yPos + height + 1f, 
+                (height + 2f) / 2f,
+                M3Colors.withAlpha(accentColor, 100).rgb
+            )
+            RenderUtils.drawRoundedRect(
+                xPos, yPos, 
+                xPos + width, yPos + height, 
+                height / 2f,
+                M3Colors.surfaceContainerHighest.rgb
+            )
             searchBox.drawTextBox()
         } else if (searchBox.text.isEmpty()) {
-            Fonts.SFApple35.drawString("Search...", xPos + 4f, yPos + height / 2f - 4f, M3Colors.onSurfaceVariant.rgb)
+            Fonts.SFApple35.drawString(
+                "Search...", 
+                xPos + 22f, yPos + (height - 8f) / 2f,
+                M3Colors.onSurfaceVariant.rgb
+            )
         } else {
             searchBox.drawTextBox()
         }
         
-        Stencil.dispose()
-        GlStateManager.disableAlpha()
-        RenderUtils.drawImage2(IconManager.search, xPos + width - 15f, yPos + 5f, 10, 10)
-        GlStateManager.enableAlpha()
-        
-        return searchBox.text.isNotEmpty()
+        return searchBox.text.isNotEmpty() || searchBox.isFocused
     }
     
     private fun searchMatch(module: M3ModuleElement): Boolean {
@@ -73,26 +89,20 @@ class M3SearchElement(var xPos: Float, var yPos: Float, var width: Float, val he
         
         if (lastHeight >= 10f) lastHeight -= 10f
         handleScrolling(wheel, h)
-        drawScroll(x, y + startYY, w, h)
+        drawScroll(x, y, w, h)
         
-        Fonts.SFApple35.drawString(
-            "Results", 
-            x + 8f, y - 12f, 
-            M3Colors.onSurfaceVariant.rgb
-        )
-        
-        var startY = y + startYY
-        if (mouseY < y + startYY || mouseY >= y + h) {
+        var startY = y
+        if (mouseY < y || mouseY >= y + h) {
             mouseY = -1
         }
         
-        RenderUtils.makeScissorBox(x, y + startYY, x + w, y + h)
+        RenderUtils.makeScissorBox(x, y, x + w, y + h)
         GL11.glEnable(GL11.GL_SCISSOR_TEST)
         
         ces.forEach { cat ->
             cat.moduleElements.forEach { mod ->
                 if (searchMatch(mod)) {
-                    startY += if (startY + animScrollHeight > y + h || startY + animScrollHeight + 40f + mod.animHeight < y + startYY) {
+                    startY += if (startY + animScrollHeight > y + h || startY + animScrollHeight + 40f + mod.animHeight < y) {
                         40f + mod.animHeight
                     } else {
                         mod.drawElement(mX, mouseY, x, startY + animScrollHeight, w, 40f, accentColor)
@@ -109,8 +119,8 @@ class M3SearchElement(var xPos: Float, var yPos: Float, var width: Float, val he
             scrollHeight += if (wheel > 0) 50f else -50f
         }
         
-        if (lastHeight > height - (startYY + 10f)) {
-            scrollHeight = scrollHeight.coerceIn(-lastHeight + height - (startYY + 10f), 0f)
+        if (lastHeight > height - 10f) {
+            scrollHeight = scrollHeight.coerceIn(-lastHeight + height - 10f, 0f)
         } else {
             scrollHeight = 0f
         }
@@ -119,11 +129,11 @@ class M3SearchElement(var xPos: Float, var yPos: Float, var width: Float, val he
     }
     
     private fun drawScroll(x: Float, y: Float, width: Float, height: Float) {
-        if (lastHeight > height - (startYY + 10f)) {
-            val visibleRatio = (height - (startYY + 10f)) / lastHeight
-            val scrollBarHeight = (height - (startYY + 10f)) * visibleRatio
-            val scrollProgress = abs(animScrollHeight / (-lastHeight + height - (startYY + 10f))).coerceIn(0f, 1f)
-            val scrollBarY = 5f + scrollProgress * (height - (startYY + 10f) - scrollBarHeight)
+        if (lastHeight > height - 10f) {
+            val visibleRatio = (height - 10f) / lastHeight
+            val scrollBarHeight = (height - 10f) * visibleRatio
+            val scrollProgress = abs(animScrollHeight / (-lastHeight + height - 10f)).coerceIn(0f, 1f)
+            val scrollBarY = scrollProgress * (height - 10f - scrollBarHeight)
             
             RenderUtils.drawRoundedRect(
                 x + width - 6f,
@@ -146,11 +156,11 @@ class M3SearchElement(var xPos: Float, var yPos: Float, var width: Float, val he
         
         if (searchBox.text.isEmpty()) return
         
-        if (mouseY < y + startYY || mouseY >= y + h) {
+        if (mouseY < y || mouseY >= y + h) {
             mouseY = -1
         }
         
-        var startY = y + startYY
+        var startY = y
         getSearchModules(ces).forEach { mod ->
             mod.handleClick(mX, mouseY, x, startY + animScrollHeight, w, 40f)
             startY += 40f + mod.animHeight
@@ -161,11 +171,11 @@ class M3SearchElement(var xPos: Float, var yPos: Float, var width: Float, val he
         if (searchBox.text.isEmpty()) return
         
         var mouseY = mY
-        if (mouseY < y + startYY || mouseY >= y + h) {
+        if (mouseY < y || mouseY >= y + h) {
             mouseY = -1
         }
         
-        var startY = y + startYY
+        var startY = y
         getSearchModules(ces).forEach { mod ->
             mod.handleRelease(mX, mouseY, x, startY + animScrollHeight, w, 40f)
             startY += 40f + mod.animHeight

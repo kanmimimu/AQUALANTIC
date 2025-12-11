@@ -247,41 +247,61 @@ class M3ModuleElement(val module: Module) : MinecraftInstance() {
 
 class M3ToggleSwitch {
     private var smooth = 0f
+    private var thumbScale = 0f
     var state = false
     
     fun onDraw(x: Float, y: Float, width: Float, height: Float, accentColor: Color) {
         smooth = if (ClickGUIModule.fastRenderValue.get()) {
             if (state) 1f else 0f
         } else {
-            smooth + (if (state) 0.2f else -0.2f) * RenderUtils.deltaTime * 0.045f
+            smooth + (if (state) 0.15f else -0.15f) * RenderUtils.deltaTime * 0.045f
         }.coerceIn(0f, 1f)
         
+        thumbScale = if (ClickGUIModule.fastRenderValue.get()) {
+            if (state) 1f else 0f
+        } else {
+            thumbScale + (if (state) 0.12f else -0.12f) * RenderUtils.deltaTime * 0.045f
+        }.coerceIn(0f, 1f)
+        
+        // Track colors (M3 Light theme)
         val trackColor = BlendUtils.blendColors(
             floatArrayOf(0f, 1f),
-            arrayOf(M3Colors.surfaceContainerHighest, accentColor),
-            smooth
-        )
-        val thumbColor = BlendUtils.blendColors(
-            floatArrayOf(0f, 1f),
-            arrayOf(M3Colors.onSurfaceVariant, M3Colors.surface),
+            arrayOf(M3Colors.surfaceContainerHighest, M3Colors.primary),
             smooth
         )
         
-        RenderUtils.drawRoundedRect(
-            x - 0.5f, y - 0.5f, 
-            x + width + 0.5f, y + height + 0.5f, 
-            (height + 1f) / 2f, 
-            M3Colors.outline.rgb
-        )
+        // Outline (only visible when OFF)
+        val outlineAlpha = ((1f - smooth) * 255).toInt().coerceIn(0, 255)
+        if (outlineAlpha > 0) {
+            RenderUtils.drawRoundedRect(
+                x - 1f, y - 1f, 
+                x + width + 1f, y + height + 1f, 
+                (height + 2f) / 2f, 
+                M3Colors.withAlpha(M3Colors.outline, outlineAlpha).rgb
+            )
+        }
+        
+        // Track fill
         RenderUtils.drawRoundedRect(
             x, y, x + width, y + height, 
             height / 2f, 
             trackColor.rgb
         )
         
-        val thumbRadius = (height - 4f) / 2f
-        val thumbX = x + (1f - smooth) * (2f + thumbRadius) + smooth * (width - 2f - thumbRadius)
-        val thumbY = y + 2f + thumbRadius
+        // Thumb color: OFF=outline, ON=onPrimary
+        val thumbColor = BlendUtils.blendColors(
+            floatArrayOf(0f, 1f),
+            arrayOf(M3Colors.outline, M3Colors.onPrimary),
+            smooth
+        )
+        
+        // Thumb size grows when ON (M3 spec: 16dp OFF, 24dp ON)
+        val minThumbRadius = (height - 6f) / 2f * 0.7f
+        val maxThumbRadius = (height - 4f) / 2f
+        val thumbRadius = minThumbRadius + (maxThumbRadius - minThumbRadius) * thumbScale
+        
+        val thumbX = x + (1f - smooth) * (3f + minThumbRadius) + smooth * (width - 3f - maxThumbRadius)
+        val thumbY = y + height / 2f
         
         RenderUtils.drawFilledCircle(thumbX, thumbY, thumbRadius, thumbColor)
     }
