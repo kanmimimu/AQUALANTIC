@@ -37,19 +37,48 @@ object Scaffold : Module() {
 
     private val rotationsValue = ListValue(
         "Rotations",
-        arrayOf("Normal", "Stabilized", "WatchDog","WatchDog2", "Telly", "Spin", "Snap", "None"),
+        arrayOf("Normal", "Stabilized", "WatchDog", "WatchDog2", "Telly", "Spin", "Snap", "None"),
         "Normal"
     ).displayable { !bridgeMode.equals("GodBridge") }
-    private val towerHorizontalValue = ListValue("TowerHorizontal", arrayOf("None", "AAC", "AdvancedTimer", "BlocksMC", "FastJump", "NCP", "Timer", "Vanilla"), "None")
-    private val towerVerticalValue = ListValue("TowerVertical", arrayOf("None", "AAC", "AdvancedTimer", "BlocksMC", "FastJump", "NCP", "Timer", "Vanilla"), "None")
-    private val timer1Value = FloatValue("Timer1", 1.09f, 0.1f, 5f).displayable { towerHorizontalValue.equals("AdvancedTimer") || towerVerticalValue.equals("AdvancedTimer") }
-    private val timer2Value = FloatValue("Timer2", 1.8f, 0.1f, 5f).displayable { towerHorizontalValue.equals("AdvancedTimer") || towerVerticalValue.equals("AdvancedTimer") }
-    private val motionBlocksMC = FloatValue("BlocksMC-Motion", 1F, 0.1F, 1F).displayable { towerHorizontalValue.equals("BlocksMC") || towerVerticalValue.equals("BlocksMC") }
-    private val motionSpeedEffectBlocksMC = FloatValue("BlocksMC-SpeedEffect-Motion", 1F, 0.1F, 1F).displayable { towerHorizontalValue.equals("BlocksMC") || towerVerticalValue.equals("BlocksMC") }
+    private val towerHorizontalValue = ListValue(
+        "TowerHorizontal",
+        arrayOf("None", "AAC", "AdvancedTimer", "BlocksMC", "FastJump", "NCP", "Timer", "Vanilla"),
+        "None"
+    )
+    private val towerVerticalValue = ListValue(
+        "TowerVertical",
+        arrayOf("None", "AAC", "AdvancedTimer", "BlocksMC", "FastJump", "NCP", "Timer", "Vanilla"),
+        "None"
+    )
+    private val timer1Value = FloatValue(
+        "Timer1",
+        1.09f,
+        0.1f,
+        5f
+    ).displayable { towerHorizontalValue.equals("AdvancedTimer") || towerVerticalValue.equals("AdvancedTimer") }
+    private val timer2Value = FloatValue(
+        "Timer2",
+        1.8f,
+        0.1f,
+        5f
+    ).displayable { towerHorizontalValue.equals("AdvancedTimer") || towerVerticalValue.equals("AdvancedTimer") }
+    private val motionBlocksMC = FloatValue(
+        "BlocksMC-Motion",
+        1F,
+        0.1F,
+        1F
+    ).displayable { towerHorizontalValue.equals("BlocksMC") || towerVerticalValue.equals("BlocksMC") }
+    private val motionSpeedEffectBlocksMC = FloatValue(
+        "BlocksMC-SpeedEffect-Motion",
+        1F,
+        0.1F,
+        1F
+    ).displayable { towerHorizontalValue.equals("BlocksMC") || towerVerticalValue.equals("BlocksMC") }
     private val autoBlockValue = ListValue("AutoBlock", arrayOf("Spoof", "Switch"), "Switch")
     private val highBlock = BoolValue("BiggestStack", false)
     private val highBlockMode = BoolValue("BiggestStackSwitchTick", false).displayable { highBlock.get() }
-    private val switchTickValue = IntegerValue("SwitchPlaceTick", 0, 0, 10).displayable { highBlockMode.get() && highBlock.get() }
+    private val switchTickValue =
+        IntegerValue("SwitchPlaceTick", 0, 0, 10).displayable { highBlockMode.get() && highBlock.get() }
     private val sprintModeValue = ListValue(
         "Sprint",
         arrayOf("Normal", "Air", "Ground", "WatchDog", "Telly", "Legit", "Custom", "None"),
@@ -60,17 +89,39 @@ object Scaffold : Module() {
         override fun onChanged(oldValue: Boolean, newValue: Boolean) {
             if (sprintCustom.get()) {
                 cancelSprint = true
-                mc.netHandler.addToSendQueue(C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SPRINTING))
+                mc.netHandler.addToSendQueue(
+                    C0BPacketEntityAction(
+                        mc.thePlayer,
+                        C0BPacketEntityAction.Action.STOP_SPRINTING
+                    )
+                )
             }
         }
     }.displayable { sprintModeValue.equals("Custom") } as BoolValue
     private val motionCustom = BoolValue("CustomMotion", false).displayable { sprintModeValue.equals("Custom") }
-    private val motionSpeedCustom = FloatValue("CustomMotionSpeed", 1F, 0.1F, 2F).displayable { motionCustom.get() && sprintModeValue.equals("Custom") }
-    private val motionSpeedEffectCustom = BoolValue("CustomMotion-SpeedEffect", false).displayable { sprintModeValue.equals("Custom") }
-    private val motionSpeedSpeedEffectCustom = FloatValue("CustomMotionSpeed-SpeedEffect", 1F, 0.1F, 2F).displayable { motionSpeedEffectCustom.get() && sprintModeValue.equals("Custom") }
+    private val motionSpeedCustom = FloatValue(
+        "CustomMotionSpeed",
+        1F,
+        0.1F,
+        2F
+    ).displayable { motionCustom.get() && sprintModeValue.equals("Custom") }
+    private val motionSpeedEffectCustom =
+        BoolValue("CustomMotion-SpeedEffect", false).displayable { sprintModeValue.equals("Custom") }
+    private val motionSpeedSpeedEffectCustom = FloatValue(
+        "CustomMotionSpeed-SpeedEffect",
+        1F,
+        0.1F,
+        2F
+    ).displayable { motionSpeedEffectCustom.get() && sprintModeValue.equals("Custom") }
     private val strafeCustom = BoolValue("CustomStrafe", false).displayable { sprintModeValue.equals("Custom") }
-    private val strafeSpeedCustom = BoolValue("CustomStrafeSpeed", false).displayable { strafeCustom.get() && sprintModeValue.equals("Custom") }
-    private val strafeSpeedCustomValue = FloatValue("CustomStrafeSpeed", 0.1F, 0.1F, 1F).displayable { strafeCustom.get() && strafeSpeedCustom.get() && sprintModeValue.equals("Custom") }
+    private val strafeSpeedCustom =
+        BoolValue("CustomStrafeSpeed", false).displayable { strafeCustom.get() && sprintModeValue.equals("Custom") }
+    private val strafeSpeedCustomValue = FloatValue(
+        "CustomStrafeSpeed",
+        0.1F,
+        0.1F,
+        1F
+    ).displayable { strafeCustom.get() && strafeSpeedCustom.get() && sprintModeValue.equals("Custom") }
     private val jumpBoost = BoolValue("JumpBoost", false).displayable { sprintModeValue.equals("WatchDog") }
     val bridgeMode = ListValue(
         "BridgeMode",
@@ -89,9 +140,14 @@ object Scaffold : Module() {
             if (v < newValue) set(v)
         }
     }.displayable { bridgeMode.equals("GodBridge") } as IntegerValue
-    private val motionValue = ListValue("JumpMode", arrayOf("Motion", "Jump", "MovementInput"), "Motion").displayable { bridgeMode.equals("GodBridge") }
+    private val motionValue = ListValue(
+        "JumpMode",
+        arrayOf("Motion", "Jump", "MovementInput"),
+        "Motion"
+    ).displayable { bridgeMode.equals("GodBridge") }
     private val watchdogTellyValue = BoolValue("WatchDogTelly", false).displayable { bridgeMode.equals("WatchDog") }
-    private val watchDogDelay = IntegerValue("WatchDogDelay", 0, 0, 5).displayable { bridgeMode.equals("WatchDog") && watchdogTellyValue.get() }
+    private val watchDogDelay =
+        IntegerValue("WatchDogDelay", 0, 0, 5).displayable { bridgeMode.equals("WatchDog") && watchdogTellyValue.get() }
     private val watchdogBoostValue = BoolValue("WatchDogBoost", false).displayable { bridgeMode.equals("WatchDog") }
     val watchdogKeepYValue = BoolValue("WatchDogSilentPosY", false).displayable { bridgeMode.equals("WatchDog") }
     val watchdogExtraClick = BoolValue("Same-Y", true).displayable { bridgeMode.equals("WatchDog") }
@@ -102,7 +158,11 @@ object Scaffold : Module() {
     ).displayable { bridgeMode.equals("WatchDog") }
     private val stopWhenTower = BoolValue("WatchDogStopWhenTower", false).displayable { bridgeMode.equals("WatchDog") }
     private val tellyTicks = IntegerValue("TellyTicks", 0, 0, 10).displayable { bridgeMode.equals("Telly") }
-    private val keepYMode = ListValue("Keep-Y Mode", arrayOf("Vanilla", "OnlySpeed", "Jump A", "Jump B"), "Vanilla").displayable { bridgeMode.equals("Keep-Y") }
+    private val keepYMode = ListValue(
+        "Keep-Y Mode",
+        arrayOf("Vanilla", "OnlySpeed", "Jump A", "Jump B"),
+        "Vanilla"
+    ).displayable { bridgeMode.equals("Keep-Y") }
     private val andJump = BoolValue("Andromeda-Jump", false).displayable { bridgeMode.equals("Andromeda") }
     private val strafeFix = BoolValue("StrafeFix", false)
     private val swingValue = BoolValue("Swing", false)
@@ -146,8 +206,10 @@ object Scaffold : Module() {
     private val omniDirectionalExpand =
         BoolValue("OmniDirectionalExpand", false).displayable { expandLengthValue.get() > 1 }
     private val timerValue = FloatValue("Timer", 1f, 0.1f, 5f)
-    private val towerTimerHorizontalSpeedValue = FloatValue("TowerTimerHorizontalSpeed", 1.5f, 0.1f, 5f).displayable { towerHorizontalValue.equals("Timer") }
-    private val towerTimerVerticalSpeedValue = FloatValue("TowerTimerVerticalSpeed", 1.5f, 0.1f, 5f).displayable { towerVerticalValue.equals("Timer") }
+    private val towerTimerHorizontalSpeedValue =
+        FloatValue("TowerTimerHorizontalSpeed", 1.5f, 0.1f, 5f).displayable { towerHorizontalValue.equals("Timer") }
+    private val towerTimerVerticalSpeedValue =
+        FloatValue("TowerTimerVerticalSpeed", 1.5f, 0.1f, 5f).displayable { towerVerticalValue.equals("Timer") }
     val eagleValue = ListValue("Eagle", arrayOf("Packet", "Silent", "Normal", "Off"), "Off")
     private val blocksToEagleValue = IntegerValue("BlocksToEagle", 0, 0, 10).displayable { !eagleValue.equals("Off") }
     private val edgeDistanceValue =
@@ -179,8 +241,10 @@ object Scaffold : Module() {
 
     // Auto block slot
     private var slot = 0
+
     // cancel sprint
     private var cancelSprint = false
+
     // Zitter Smooth
     private var zitterDirection = false
 
@@ -231,12 +295,15 @@ object Scaffold : Module() {
                 135f
             ).any { yaw == it } && player.movementInput.moveForward != 0f && player.movementInput.moveStrafe == 0f
         }
+
     private fun isDiagonal(yaw: Float): Boolean {
         val absYaw = abs(yaw % 90.0F)
         return absYaw > 20.0F && absYaw < 70.0F
     }
+
     private val steps45 = arrayListOf(-135f, -45f, 45f, 135f)
     private val steps4590 = arrayListOf(-180f, -135f, -45f, 45f, 135f, 180f)
+
     /**
      * Enable module
      */
@@ -248,7 +315,12 @@ object Scaffold : Module() {
             y = mc.thePlayer.posY.toInt()
         }
         if (cancelSprintCustom.get() && sprintModeValue.equals("Custom")) {
-            mc.netHandler.addToSendQueue(C0BPacketEntityAction(mc.thePlayer, C0BPacketEntityAction.Action.STOP_SPRINTING))
+            mc.netHandler.addToSendQueue(
+                C0BPacketEntityAction(
+                    mc.thePlayer,
+                    C0BPacketEntityAction.Action.STOP_SPRINTING
+                )
+            )
             cancelSprint = true
         }
         prevItem = mc.thePlayer.inventory.currentItem
@@ -258,6 +330,7 @@ object Scaffold : Module() {
         zitterTimer.reset()
         tellyPlaceTicks = 0
     }
+
     /**
      * Update event
      *
@@ -281,7 +354,8 @@ object Scaffold : Module() {
             }
         }
         if (blockAmount == 0 && InventoryUtils.findAutoBlockBlock(highBlock.get()) != -1) {
-            blockAmount = mc.thePlayer.inventory.getStackInSlot(InventoryUtils.findAutoBlockBlock(highBlock.get() && !highBlockMode.get() || !highBlock.get() && placeTick >= blockAmount || highBlock.get() && highBlockMode.get() && switchPlaceTick >= switchTickValue.get()) - 36).stackSize
+            blockAmount =
+                mc.thePlayer.inventory.getStackInSlot(InventoryUtils.findAutoBlockBlock(highBlock.get() && !highBlockMode.get() || !highBlock.get() && placeTick >= blockAmount || highBlock.get() && highBlockMode.get() && switchPlaceTick >= switchTickValue.get()) - 36).stackSize
         }
         if (bridgeMode.equals("GodBridge")) {
             if (godBridgePlaceTicks > randomGodBridgePlaceTicks && !towerStatus && mc.thePlayer.onGround) {
@@ -351,7 +425,20 @@ object Scaffold : Module() {
             }
         }
         if (bridgeMode.equals("Andromeda")) {
-            if (BlockUtils.getBlock(BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ).down()) !is BlockAir && BlockUtils.getBlock(BlockPos(mc.thePlayer.posX, mc.thePlayer.posY + 2, mc.thePlayer.posZ)) !is BlockAir) {
+            if (BlockUtils.getBlock(
+                    BlockPos(
+                        mc.thePlayer.posX,
+                        mc.thePlayer.posY,
+                        mc.thePlayer.posZ
+                    ).down()
+                ) !is BlockAir && BlockUtils.getBlock(
+                    BlockPos(
+                        mc.thePlayer.posX,
+                        mc.thePlayer.posY + 2,
+                        mc.thePlayer.posZ
+                    )
+                ) !is BlockAir
+            ) {
                 if (andJump.get() && mc.thePlayer.onGround) {
                     MovementUtils.jump(true)
                 }
@@ -360,7 +447,7 @@ object Scaffold : Module() {
         }
         if (towerStatus) {
             if (MovementUtils.isMoving()) {
-                when(towerHorizontalValue.get().lowercase()) {
+                when (towerHorizontalValue.get().lowercase()) {
                     "timer" -> mc.timer.timerSpeed = towerTimerHorizontalSpeedValue.get()
                     "advancedtimer" -> {
                         if (intavePlacedHorizontal) {
@@ -369,10 +456,11 @@ object Scaffold : Module() {
                             mc.timer.timerSpeed = timer1Value.get()
                         }
                     }
+
                     else -> mc.timer.timerSpeed = timerValue.get()
                 }
             } else {
-                when(towerVerticalValue.get().lowercase()) {
+                when (towerVerticalValue.get().lowercase()) {
                     "timer" -> mc.timer.timerSpeed = towerTimerVerticalSpeedValue.get()
                     "advancedtimer" -> {
                         if (intavePlaced) {
@@ -381,6 +469,7 @@ object Scaffold : Module() {
                             mc.timer.timerSpeed = timer1Value.get()
                         }
                     }
+
                     else -> mc.timer.timerSpeed = timerValue.get()
                 }
             }
@@ -397,10 +486,16 @@ object Scaffold : Module() {
             val sprint = sprintModeValue
             sprintActive =
                 (sprint.equals("Normal") && (!towerHorizontalValue.equals("BlocksMC") || !towerStatus)
-                        || sprint.equals("Legit") && (abs((MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw) - MathHelper.wrapAngleTo180_float(RotationUtils.serverRotation.yaw)).toDouble()) < 90)
+                        || sprint.equals("Legit") && (abs(
+                    (MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw) - MathHelper.wrapAngleTo180_float(
+                        RotationUtils.serverRotation.yaw
+                    )).toDouble()
+                ) < 90)
                         || (sprint.equals("Ground") && mc.thePlayer.onGround)
                         || (sprint.equals("Air") && !mc.thePlayer.onGround)
-                        || sprint.equals("WatchDog") && PlayerUtils.offGroundTicks < watchDogDelay.get() && !towerStatus && bridgeMode.equals("WatchDog")
+                        || sprint.equals("WatchDog") && PlayerUtils.offGroundTicks < watchDogDelay.get() && !towerStatus && bridgeMode.equals(
+                    "WatchDog"
+                )
                         || sprint.equals("Telly") && !shouldPlace()
                         || sprint.equals("Custom") && sprintCustom.get())
             if (sprint.equals("Custom")) {
@@ -414,7 +509,11 @@ object Scaffold : Module() {
             }
         } else sprintActive = false
         shouldGoDown =
-            GameSettings.isKeyDown(mc.gameSettings.keyBindSneak) && mc.thePlayer.inventory.getStackInSlot(InventoryUtils.findAutoBlockBlock(highBlock.get() && !highBlockMode.get() || !highBlock.get() && placeTick >= blockAmount || highBlock.get() && highBlockMode.get() && switchPlaceTick >= switchTickValue.get())).stackSize > 1
+            GameSettings.isKeyDown(mc.gameSettings.keyBindSneak) && mc.thePlayer.inventory.getStackInSlot(
+                InventoryUtils.findAutoBlockBlock(
+                    highBlock.get() && !highBlockMode.get() || !highBlock.get() && placeTick >= blockAmount || highBlock.get() && highBlockMode.get() && switchPlaceTick >= switchTickValue.get()
+                )
+            ).stackSize > 1
         if (shouldGoDown && !downValue.get()) mc.gameSettings.keyBindSneak.pressed = false
         if (mc.thePlayer.onGround) {
             // Smooth Zitter
@@ -492,6 +591,7 @@ object Scaffold : Module() {
         }
         place()
     }
+
     @EventTarget
     fun onJump(event: JumpEvent) {
         if (MovementUtils.isMoving() && jumpBoost.get() && sprintModeValue.equals("WatchDog") && GameSettings.isKeyDown(
@@ -524,7 +624,10 @@ object Scaffold : Module() {
             packet.facingX = packet.facingX.coerceIn(-1.0000F, 1.0000F)
             packet.facingY = packet.facingY.coerceIn(-1.0000F, 1.0000F)
             packet.facingZ = packet.facingZ.coerceIn(-1.0000F, 1.0000F)
-            if (towerStatus && ((MovementUtils.isMoving() && towerHorizontalValue.equals("BlocksMC")) || (!MovementUtils.isMoving() && towerVerticalValue.equals("BlocksMC")))) {
+            if (towerStatus && ((MovementUtils.isMoving() && towerHorizontalValue.equals("BlocksMC")) || (!MovementUtils.isMoving() && towerVerticalValue.equals(
+                    "BlocksMC"
+                )))
+            ) {
                 if (mc.thePlayer.motionY > -0.0784000015258789) {
                     if (packet.position.equals(
                             BlockPos(
@@ -558,9 +661,13 @@ object Scaffold : Module() {
                 Rotation(if (lockRotation == null) MovementUtils.movingYaw + 180 else lockRotation!!.yaw, pitch)
 
             "watchdog" -> rotation = Rotation(
-                if (watchDogDelay.get() > PlayerUtils.offGroundTicks && (!towerStatus && (!watchdogBoostValue.get() || !GameSettings.isKeyDown(mc.gameSettings.keyBindUseItem))) && bridgeMode.equals("WatchDog") && watchdogTellyValue.get()) MovementUtils.movingYaw else if (lockRotation != null) lockRotation!!.yaw else MovementUtils.movingYaw - 180,
+                if (watchDogDelay.get() > PlayerUtils.offGroundTicks && (!towerStatus && (!watchdogBoostValue.get() || !GameSettings.isKeyDown(
+                        mc.gameSettings.keyBindUseItem
+                    ))) && bridgeMode.equals("WatchDog") && watchdogTellyValue.get()
+                ) MovementUtils.movingYaw else if (lockRotation != null) lockRotation!!.yaw else MovementUtils.movingYaw - 180,
                 pitch
             )
+
             "watchdog2" -> {
                 val currentYaw = MovementUtils.movingYaw
                 val yawDiffTo180 = currentYaw - 180.0F
@@ -574,11 +681,18 @@ object Scaffold : Module() {
                     pitch
                 )
             }
+
             "telly" -> {
-                val rotationYaw = if (prevTowered) if (lockRotation == null) MovementUtils.movingYaw - 180 else lockRotation!!.yaw else if (!shouldPlace()) MovementUtils.movingYaw else if (lockRotation == null) MovementUtils.movingYaw - 180 else lockRotation!!.yaw
+                val rotationYaw =
+                    if (prevTowered) if (lockRotation == null) MovementUtils.movingYaw - 180 else lockRotation!!.yaw else if (!shouldPlace()) MovementUtils.movingYaw else if (lockRotation == null) MovementUtils.movingYaw - 180 else lockRotation!!.yaw
                 rotation = Rotation(rotationYaw, if (lockRotation == null) 85F else lockRotation!!.pitch)
             }
-            "godbridge" -> rotation = if (lockRotation != null) lockRotation else Rotation(if (isLookingDiagonally) MovementUtils.movingYaw - 180 else MovementUtils.movingYaw - 135F, 75F)
+
+            "godbridge" -> rotation = if (lockRotation != null) lockRotation else Rotation(
+                if (isLookingDiagonally) MovementUtils.movingYaw - 180 else MovementUtils.movingYaw - 135F,
+                75F
+            )
+
             "spin" -> {
                 spinYaw += 45F
                 if (spinYaw > 180F) {
@@ -614,13 +728,16 @@ object Scaffold : Module() {
         if (InventoryUtils.findAutoBlockBlock(highBlock.get()) != -1) {
             if ((autoBlockValue.equals("Spoof")) && (mc.thePlayer.heldItem == null || !(mc.thePlayer.heldItem.item is ItemBlock && !InventoryUtils.isBlockListBlock(
                     mc.thePlayer.heldItem.item as ItemBlock
-                )))) {
+                )))
+            ) {
                 SpoofItemUtils.startSpoof(prevItem, counter.get())
             }
             if ((mc.thePlayer.heldItem == null || !(mc.thePlayer.heldItem.item is ItemBlock && !InventoryUtils.isBlockListBlock(
                     mc.thePlayer.heldItem.item as ItemBlock
-                ))) || highBlock.get() && !highBlockMode.get() || !highBlock.get() && placeTick >= blockAmount || highBlock.get() && highBlockMode.get() && switchPlaceTick >= switchTickValue.get()) {
-                mc.thePlayer.inventory.currentItem = InventoryUtils.findAutoBlockBlock(highBlock.get() && !highBlockMode.get() || !highBlock.get() && placeTick >= blockAmount || highBlock.get() && highBlockMode.get() && switchPlaceTick >= switchTickValue.get()) - 36
+                ))) || highBlock.get() && !highBlockMode.get() || !highBlock.get() && placeTick >= blockAmount || highBlock.get() && highBlockMode.get() && switchPlaceTick >= switchTickValue.get()
+            ) {
+                mc.thePlayer.inventory.currentItem =
+                    InventoryUtils.findAutoBlockBlock(highBlock.get() && !highBlockMode.get() || !highBlock.get() && placeTick >= blockAmount || highBlock.get() && highBlockMode.get() && switchPlaceTick >= switchTickValue.get()) - 36
                 blockAmount = 0
                 placeTick = 0
                 switchPlaceTick = 0
@@ -665,21 +782,25 @@ object Scaffold : Module() {
                     )
                 }
             }
+
             "blocksmc" -> {
                 MovementUtils.strafe()
                 if (mc.thePlayer.onGround) {
                     mc.thePlayer.motionY = 0.42
                 }
             }
+
             "vanilla" -> {
                 mc.thePlayer.motionY = 0.42
             }
+
             "lowhop" -> {
                 MovementUtils.strafe()
                 if (mc.thePlayer.onGround) {
                     mc.thePlayer.motionY = 0.4
                 }
             }
+
             "fastjump" -> {
                 MovementUtils.strafe()
                 if (mc.thePlayer.motionY < 0) {
@@ -689,6 +810,7 @@ object Scaffold : Module() {
                     }
                 }
             }
+
             "aac" -> {
                 MovementUtils.strafe()
                 if (mc.thePlayer.posY % 1 <= 0.005) {
@@ -700,6 +822,7 @@ object Scaffold : Module() {
                     mc.thePlayer.motionY = 0.41998
                 }
             }
+
             "extra" -> {
                 val yState = (mc.thePlayer.posY % 1.0 * 100.0).toInt()
                 when (towerTick) {
@@ -709,22 +832,33 @@ object Scaffold : Module() {
                             mc.thePlayer.motionY = -0.0784000015258789
                         }
                     }
+
                     1 -> {
-                        if (yState == 0 && isReplaceable(BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1.0, mc.thePlayer.posZ))) {
+                        if (yState == 0 && isReplaceable(
+                                BlockPos(
+                                    mc.thePlayer.posX,
+                                    mc.thePlayer.posY - 1.0,
+                                    mc.thePlayer.posZ
+                                )
+                            )
+                        ) {
                             towerTick = 2
                             mc.thePlayer.motionY = 0.42
                         } else {
                             towerTick = 0
                         }
                     }
+
                     2 -> {
                         towerTick = 3
                         mc.thePlayer.motionY -= RandomUtils.nextDouble(0.00101, 0.00109)
                     }
+
                     3 -> {
                         towerTick = 1
                         mc.thePlayer.motionY = 1.0 - mc.thePlayer.posY % 1.0
                     }
+
                     else -> {
                         towerTick = 0
                     }
@@ -761,14 +895,33 @@ object Scaffold : Module() {
             BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1.0, mc.thePlayer.posZ)
         } else if (bridgeMode.equals("Telly") && !towerStatus) {
             BlockPos(mc.thePlayer.posX, lastGroundY!!.toDouble() - 1.0, mc.thePlayer.posZ)
-        } else if (bridgeMode.equals("WatchDog") && !towerStatus && watchdogExtraClick.get() && (!watchdogBoostValue.get() || !GameSettings.isKeyDown(mc.gameSettings.keyBindUseItem))) {
-            if (BlockUtils.getBlock(BlockPos(mc.thePlayer.posX, lastGroundY!!.toDouble() - 1.0, mc.thePlayer.posZ)) !is BlockAir && BlockUtils.getBlock(BlockPos(mc.thePlayer.posX, lastGroundY!!.toDouble(), mc.thePlayer.posZ)) is BlockAir && (mc.thePlayer.posY > lastGroundY!! && mc.thePlayer.posY + MovementUtils.predictedMotion(mc.thePlayer.motionY, 3) < lastGroundY!! + 1 && (started || PlayerUtils.offGroundTicks > 1))) {
+        } else if (bridgeMode.equals("WatchDog") && !towerStatus && watchdogExtraClick.get() && (!watchdogBoostValue.get() || !GameSettings.isKeyDown(
+                mc.gameSettings.keyBindUseItem
+            ))
+        ) {
+            if (BlockUtils.getBlock(
+                    BlockPos(
+                        mc.thePlayer.posX,
+                        lastGroundY!!.toDouble() - 1.0,
+                        mc.thePlayer.posZ
+                    )
+                ) !is BlockAir && BlockUtils.getBlock(
+                    BlockPos(
+                        mc.thePlayer.posX,
+                        lastGroundY!!.toDouble(),
+                        mc.thePlayer.posZ
+                    )
+                ) is BlockAir && (mc.thePlayer.posY > lastGroundY!! && mc.thePlayer.posY + MovementUtils.predictedMotion(
+                    mc.thePlayer.motionY,
+                    3
+                ) < lastGroundY!! + 1 && (started || PlayerUtils.offGroundTicks > 1))
+            ) {
                 BlockPos(mc.thePlayer.posX, lastGroundY!!.toDouble(), mc.thePlayer.posZ)
             } else {
                 BlockPos(mc.thePlayer.posX, lastGroundY!!.toDouble() - 1.0, mc.thePlayer.posZ)
             }
         } else if (bridgeMode.equals("Keep-Y") && !towerStatus) {
-            val mode = keepYMode.get().lowercase()
+            keepYMode.get().lowercase()
             val yPos = if (isKeepYSpecialTick()) {
                 lastGroundY!!.toDouble()
             } else {
@@ -776,7 +929,14 @@ object Scaffold : Module() {
             }
             BlockPos(mc.thePlayer.posX, yPos, mc.thePlayer.posZ)
         } else if (bridgeMode.equals("Andromeda") && !towerStatus) {
-            if (BlockUtils.getBlock(BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ).down()) is BlockAir) {
+            if (BlockUtils.getBlock(
+                    BlockPos(
+                        mc.thePlayer.posX,
+                        mc.thePlayer.posY,
+                        mc.thePlayer.posZ
+                    ).down()
+                ) is BlockAir
+            ) {
                 BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ).down()
             } else {
                 BlockPos(mc.thePlayer.posX, mc.thePlayer.posY + 2, mc.thePlayer.posZ)
@@ -791,7 +951,8 @@ object Scaffold : Module() {
         if (!expand && (!isReplaceable(blockPosition) || search(
                 blockPosition,
                 !shouldGoDown
-            ))) return
+            ))
+        ) return
         if (expand) {
             val yaw = mc.thePlayer.rotationYaw.toRadiansD()
             val x =
@@ -841,6 +1002,7 @@ object Scaffold : Module() {
                         else -> true
                     }
                 }
+
                 else -> true
             }
 
@@ -950,7 +1112,10 @@ object Scaffold : Module() {
     @EventTarget
     fun onMove(event: MoveEvent) {
         if (sprintModeValue.equals("Custom")) {
-            if (towerStatus && ((MovementUtils.isMoving() && towerHorizontalValue.equals("BlocksMC")) || (!MovementUtils.isMoving() && towerVerticalValue.equals("BlocksMC")))) {
+            if (towerStatus && ((MovementUtils.isMoving() && towerHorizontalValue.equals("BlocksMC")) || (!MovementUtils.isMoving() && towerVerticalValue.equals(
+                    "BlocksMC"
+                )))
+            ) {
                 if (mc.thePlayer.isPotionActive(Potion.moveSpeed)) {
                     event.x *= motionSpeedEffectBlocksMC.get()
                     event.z *= motionSpeedEffectBlocksMC.get()
@@ -1033,7 +1198,10 @@ object Scaffold : Module() {
         placeRotation ?: return false
         val fixYaw = round(placeRotation.rotation.yaw / 45f) * 45f
         val stabilized = if (fixYaw in steps4590) fixYaw else MovementUtils.movingYaw + steps4590[0]
-        lockRotation = if (bridgeMode.equals("GodBridge")) Rotation(if (isLookingDiagonally) MovementUtils.movingYaw - 180 else MovementUtils.movingYaw - 135F, 78F) else when (rotationsValue.get().lowercase()) {
+        lockRotation = if (bridgeMode.equals("GodBridge")) Rotation(
+            if (isLookingDiagonally) MovementUtils.movingYaw - 180 else MovementUtils.movingYaw - 135F,
+            78F
+        ) else when (rotationsValue.get().lowercase()) {
             "normal" -> {
                 placeRotation.rotation
             }
@@ -1047,7 +1215,10 @@ object Scaffold : Module() {
 
             "watchdog" -> {
                 Rotation(
-                    if (watchDogDelay.get() > PlayerUtils.offGroundTicks && (!towerStatus && (!watchdogBoostValue.get() || !GameSettings.isKeyDown(mc.gameSettings.keyBindUseItem))) && watchdogTellyValue.get() && bridgeMode.equals("WatchDog")) MovementUtils.movingYaw else MovementUtils.movingYaw - 180,
+                    if (watchDogDelay.get() > PlayerUtils.offGroundTicks && (!towerStatus && (!watchdogBoostValue.get() || !GameSettings.isKeyDown(
+                            mc.gameSettings.keyBindUseItem
+                        ))) && watchdogTellyValue.get() && bridgeMode.equals("WatchDog")
+                    ) MovementUtils.movingYaw else MovementUtils.movingYaw - 180,
                     placeRotation.rotation.pitch
                 )
             }
@@ -1093,7 +1264,7 @@ object Scaffold : Module() {
                 rotationSpeed
             )
         RotationUtils.setTargetRotationReverse(
-            if(rotationSpeedValue.get()) limitedRotation else lockRotation,
+            if (rotationSpeedValue.get()) limitedRotation else lockRotation,
             1,
             if (rotationRevValue.get()) {
                 rotationRevTickValue.get()
@@ -1140,6 +1311,7 @@ object Scaffold : Module() {
         val obj = mc.theWorld.rayTraceBlocks(eyesPos, vector, false, false, true)
         return obj.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && obj.blockPos == neighbor
     }
+
     private val rotationSpeed: Float
         get() = if (rotationSpeedValue.get()) (Math.random() * (maxRotationSpeedValue.get() - minRotationSpeedValue.get()) + minRotationSpeedValue.get()).toFloat() else Float.MAX_VALUE
     private val getDelay: Long
