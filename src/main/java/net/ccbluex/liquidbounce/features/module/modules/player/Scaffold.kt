@@ -236,7 +236,9 @@ object Scaffold : Module() {
     private var spinYaw = 0f
 
 
-    //PrevItem
+    // Myau-style item spoof: stores original slot for spoofing
+    @JvmField
+    var lastSlot = -1
     private var prevItem = 0
 
     // Auto block slot
@@ -323,12 +325,25 @@ object Scaffold : Module() {
             )
             cancelSprint = true
         }
+        lastSlot = mc.thePlayer.inventory.currentItem
         prevItem = mc.thePlayer.inventory.currentItem
         slot = mc.thePlayer.inventory.currentItem
         if (mc.thePlayer == null) return
         lastGroundY = mc.thePlayer.posY.toInt()
         zitterTimer.reset()
         tellyPlaceTicks = 0
+    }
+
+    /**
+     * Capture slot switch events during Spoof mode
+     * Updates lastSlot to the new slot without actually switching
+     */
+    @EventTarget
+    fun onSlotSwitch(event: SlotSwitchEvent) {
+        if (state && autoBlockValue.equals("Spoof") && lastSlot >= 0) {
+            lastSlot = event.calculateNewSlot(lastSlot)
+            event.cancelEvent()
+        }
     }
 
     /**
@@ -726,13 +741,20 @@ object Scaffold : Module() {
             mc.thePlayer.motionZ *= 0.92
         }
         if (InventoryUtils.findAutoBlockBlock(highBlock.get()) != -1) {
+            // Spoof mode: switch to block slot, MixinEntityRenderer will spoof rendering back to lastSlot
             if ((autoBlockValue.equals("Spoof")) && (mc.thePlayer.heldItem == null || !(mc.thePlayer.heldItem.item is ItemBlock && !InventoryUtils.isBlockListBlock(
                     mc.thePlayer.heldItem.item as ItemBlock
                 )))
             ) {
-                SpoofItemUtils.startSpoof(prevItem, counter.get())
-            }
-            if ((mc.thePlayer.heldItem == null || !(mc.thePlayer.heldItem.item is ItemBlock && !InventoryUtils.isBlockListBlock(
+                val blockSlot = InventoryUtils.findAutoBlockBlock(highBlock.get() && !highBlockMode.get() || !highBlock.get() && placeTick >= blockAmount || highBlock.get() && highBlockMode.get() && switchPlaceTick >= switchTickValue.get())
+                if (blockSlot != -1) {
+                    mc.thePlayer.inventory.currentItem = blockSlot - 36
+                    blockAmount = 0
+                    placeTick = 0
+                    switchPlaceTick = 0
+                    mc.playerController.updateController()
+                }
+            } else if ((mc.thePlayer.heldItem == null || !(mc.thePlayer.heldItem.item is ItemBlock && !InventoryUtils.isBlockListBlock(
                     mc.thePlayer.heldItem.item as ItemBlock
                 ))) || highBlock.get() && !highBlockMode.get() || !highBlock.get() && placeTick >= blockAmount || highBlock.get() && highBlockMode.get() && switchPlaceTick >= switchTickValue.get()
             ) {
@@ -1091,11 +1113,12 @@ object Scaffold : Module() {
                 0
             }
         )
-        if (autoBlockValue.equals("Switch")) {
-            mc.thePlayer.inventory.currentItem = prevItem
-        } else if (autoBlockValue.equals("Spoof")) {
-            SpoofItemUtils.stopSpoof()
+        if (autoBlockValue.equals("Switch") || autoBlockValue.equals("Spoof")) {
+            if (lastSlot >= 0 && lastSlot <= 8) {
+                mc.thePlayer.inventory.currentItem = lastSlot
+            }
         }
+        lastSlot = -1
         placeTick = 0
         switchPlaceTick = 0
         blockAmount = 0
@@ -1332,5 +1355,13 @@ object Scaffold : Module() {
 
     private fun onGround(): Boolean {
         return mc.thePlayer.onGround || PlayerUtils.offGroundTicks == 0
+    }
+
+    /**
+     * Myau-style item spoof: returns the original slot for rendering purposes
+     */
+    @JvmStatic
+    fun getSlot(): Int {
+        return if (state && autoBlockValue.equals("Spoof") && lastSlot >= 0) lastSlot else -1
     }
 }

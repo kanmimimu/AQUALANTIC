@@ -56,6 +56,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.minecraft.entity.player.InventoryPlayer;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -79,8 +81,10 @@ public abstract class MixinMinecraft {
 
     @Shadow
     public boolean skipRenderWorld;
+
     @Shadow
     protected abstract void runTick();
+
     @Shadow
     private int leftClickCounter;
 
@@ -96,7 +100,8 @@ public abstract class MixinMinecraft {
     @Shadow
     public EffectRenderer effectRenderer;
 
-    @Shadow public EntityRenderer entityRenderer;
+    @Shadow
+    public EntityRenderer entityRenderer;
 
     @Shadow
     public PlayerControllerMP playerController;
@@ -124,13 +129,16 @@ public abstract class MixinMinecraft {
     public Timer timer;
 
     @Shadow
-    private void rightClickMouse() {}
+    private void rightClickMouse() {
+    }
 
     @Shadow
-    private void clickMouse() {}
+    private void clickMouse() {
+    }
 
     @Shadow
-    private void middleClickMouse() {}
+    private void middleClickMouse() {
+    }
 
     @Shadow
     public long startNanoTime;
@@ -198,7 +206,8 @@ public abstract class MixinMinecraft {
     private static Logger logger;
 
     @Shadow
-    private void displayDebugInfo(long elapsedTicksTime) {}
+    private void displayDebugInfo(long elapsedTicksTime) {
+    }
 
     @Shadow
     private long debugCrashKeyPressTime;
@@ -246,13 +255,15 @@ public abstract class MixinMinecraft {
     public abstract void setIngameFocus();
 
     @Shadow
-    private void updateDebugProfilerName(int p_updateDebugProfilerName_1_) {}
+    private void updateDebugProfilerName(int p_updateDebugProfilerName_1_) {
+    }
 
     @Shadow
     public abstract void displayInGameMenu();
 
     @Shadow
-    public void displayGuiScreen(GuiScreen p_displayGuiScreen_1_) {}
+    public void displayGuiScreen(GuiScreen p_displayGuiScreen_1_) {
+    }
 
     @Inject(method = "run", at = @At("HEAD"))
     private void init(CallbackInfo callbackInfo) {
@@ -262,6 +273,7 @@ public abstract class MixinMinecraft {
         if (displayHeight < 622)
             displayHeight = 622;
     }
+
     @Inject(method = "startGame", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;checkGLError(Ljava/lang/String;)V", ordinal = 2, shift = At.Shift.AFTER))
     private void startGame(CallbackInfo callbackInfo) {
         CrossSine.INSTANCE.initClient();
@@ -272,24 +284,28 @@ public abstract class MixinMinecraft {
         Display.setTitle(CrossSine.CLIENT_LOADING);
     }
 
-
     @Inject(method = "displayGuiScreen", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;currentScreen:Lnet/minecraft/client/gui/GuiScreen;", shift = At.Shift.AFTER))
     private void displayGuiScreen(CallbackInfo callbackInfo) {
         if (!CrossSine.INSTANCE.getDestruced()) {
-            if (currentScreen instanceof net.minecraft.client.gui.GuiMainMenu || (currentScreen != null && currentScreen.getClass().getName().startsWith("net.labymod") && currentScreen.getClass().getSimpleName().equals("ModGuiMainMenu"))) {
+            if (currentScreen instanceof net.minecraft.client.gui.GuiMainMenu
+                    || (currentScreen != null && currentScreen.getClass().getName().startsWith("net.labymod")
+                            && currentScreen.getClass().getSimpleName().equals("ModGuiMainMenu"))) {
                 currentScreen = CrossSine.mainMenu;
 
                 ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
-                currentScreen.setWorldAndResolution(Minecraft.getMinecraft(), scaledResolution.getScaledWidth(), scaledResolution.getScaledHeight());
+                currentScreen.setWorldAndResolution(Minecraft.getMinecraft(), scaledResolution.getScaledWidth(),
+                        scaledResolution.getScaledHeight());
                 skipRenderWorld = false;
             }
 
             CrossSine.eventManager.callEvent(new ScreenEvent(currentScreen));
         }
     }
+
     public long getTime() {
         return (Sys.getTime() * 1000) / Sys.getTimerResolution();
     }
+
     private long lastFrame = getTime();
 
     @Overwrite
@@ -303,29 +319,23 @@ public abstract class MixinMinecraft {
         long i = System.nanoTime();
         this.mcProfiler.startSection("root");
 
-        if (Display.isCreated() && Display.isCloseRequested())
-        {
+        if (Display.isCreated() && Display.isCloseRequested()) {
             this.shutdown();
         }
 
-        if (this.isGamePaused && this.theWorld != null)
-        {
+        if (this.isGamePaused && this.theWorld != null) {
             float f = this.timer.renderPartialTicks;
             this.timer.updateTimer();
             this.timer.renderPartialTicks = f;
-        }
-        else
-        {
+        } else {
             this.timer.updateTimer();
         }
 
         this.mcProfiler.startSection("scheduledExecutables");
 
-        synchronized (this.scheduledTasks)
-        {
-            while (!this.scheduledTasks.isEmpty())
-            {
-                Util.runTask((FutureTask)this.scheduledTasks.poll(), logger);
+        synchronized (this.scheduledTasks) {
+            while (!this.scheduledTasks.isEmpty()) {
+                Util.runTask((FutureTask) this.scheduledTasks.poll(), logger);
             }
         }
 
@@ -333,22 +343,21 @@ public abstract class MixinMinecraft {
         long l = System.nanoTime();
         this.mcProfiler.startSection("tick");
 
-        for (int j = 0; j < this.timer.elapsedTicks; ++j)
-        {
-            if(Minecraft.getMinecraft().thePlayer != null) {
+        for (int j = 0; j < this.timer.elapsedTicks; ++j) {
+            if (Minecraft.getMinecraft().thePlayer != null) {
                 boolean skip = false;
 
-                if(j == 0) {
+                if (j == 0) {
                     TickBase tickBase = CrossSine.moduleManager.getModule(TickBase.class);
 
-                    if(tickBase.getState()) {
+                    if (tickBase.getState()) {
                         int extraTicks = tickBase.getExtraTicks();
 
-                        if(extraTicks == -1) {
+                        if (extraTicks == -1) {
                             skip = true;
                         } else {
-                            if(extraTicks > 0) {
-                                for(int aa = 0; aa < extraTicks; aa++) {
+                            if (extraTicks > 0) {
+                                for (int aa = 0; aa < extraTicks; aa++) {
                                     this.runTick();
                                 }
 
@@ -358,7 +367,7 @@ public abstract class MixinMinecraft {
                     }
                 }
 
-                if(!skip) {
+                if (!skip) {
                     this.runTick();
                 }
             } else {
@@ -379,15 +388,13 @@ public abstract class MixinMinecraft {
         this.mcProfiler.startSection("display");
         GlStateManager.enableTexture2D();
 
-        if (this.thePlayer != null && this.thePlayer.isEntityInsideOpaqueBlock())
-        {
+        if (this.thePlayer != null && this.thePlayer.isEntityInsideOpaqueBlock()) {
             this.gameSettings.thirdPersonView = 0;
         }
 
         this.mcProfiler.endSection();
 
-        if (!this.skipRenderWorld)
-        {
+        if (!this.skipRenderWorld) {
             this.mcProfiler.endStartSection("gameRenderer");
             this.entityRenderer.updateCameraAndRender(this.timer.renderPartialTicks, i);
             this.mcProfiler.endSection();
@@ -396,18 +403,14 @@ public abstract class MixinMinecraft {
 
         this.mcProfiler.endSection();
 
-        if (this.gameSettings.showDebugInfo && this.gameSettings.showDebugProfilerChart && !this.gameSettings.hideGUI)
-        {
-            if (!this.mcProfiler.profilingEnabled)
-            {
+        if (this.gameSettings.showDebugInfo && this.gameSettings.showDebugProfilerChart && !this.gameSettings.hideGUI) {
+            if (!this.mcProfiler.profilingEnabled) {
                 this.mcProfiler.clearProfiling();
             }
 
             this.mcProfiler.profilingEnabled = true;
             this.displayDebugInfo(i1);
-        }
-        else
-        {
+        } else {
             this.mcProfiler.profilingEnabled = false;
             this.prevFrameTime = System.nanoTime();
         }
@@ -431,28 +434,35 @@ public abstract class MixinMinecraft {
         this.mcProfiler.endSection();
         this.checkGLError("Post render");
         ++this.fpsCounter;
-        this.isGamePaused = this.isSingleplayer() && this.currentScreen != null && this.currentScreen.doesGuiPauseGame() && !this.theIntegratedServer.getPublic();
+        this.isGamePaused = this.isSingleplayer() && this.currentScreen != null && this.currentScreen.doesGuiPauseGame()
+                && !this.theIntegratedServer.getPublic();
         long k = System.nanoTime();
         this.frameTimer.addFrame(k - this.startNanoTime);
         this.startNanoTime = k;
 
-        while (Minecraft.getSystemTime() >= this.debugUpdateTime + 1000L)
-        {
+        while (Minecraft.getSystemTime() >= this.debugUpdateTime + 1000L) {
             this.debugFPS = this.fpsCounter;
-            this.debug = String.format("%d fps (%d chunk update%s) T: %s%s%s%s%s", new Object[] {Integer.valueOf(debugFPS), Integer.valueOf(RenderChunk.renderChunksUpdated), RenderChunk.renderChunksUpdated != 1 ? "s" : "", (float)this.gameSettings.limitFramerate == GameSettings.Options.FRAMERATE_LIMIT.getValueMax() ? "inf" : Integer.valueOf(this.gameSettings.limitFramerate), this.gameSettings.enableVsync ? " vsync" : "", this.gameSettings.fancyGraphics ? "" : " fast", this.gameSettings.clouds == 0 ? "" : (this.gameSettings.clouds == 1 ? " fast-clouds" : " fancy-clouds"), OpenGlHelper.useVbo() ? " vbo" : ""});
+            this.debug = String.format("%d fps (%d chunk update%s) T: %s%s%s%s%s",
+                    new Object[] { Integer.valueOf(debugFPS), Integer.valueOf(RenderChunk.renderChunksUpdated),
+                            RenderChunk.renderChunksUpdated != 1 ? "s" : "",
+                            (float) this.gameSettings.limitFramerate == GameSettings.Options.FRAMERATE_LIMIT
+                                    .getValueMax() ? "inf" : Integer.valueOf(this.gameSettings.limitFramerate),
+                            this.gameSettings.enableVsync ? " vsync" : "",
+                            this.gameSettings.fancyGraphics ? "" : " fast",
+                            this.gameSettings.clouds == 0 ? ""
+                                    : (this.gameSettings.clouds == 1 ? " fast-clouds" : " fancy-clouds"),
+                            OpenGlHelper.useVbo() ? " vbo" : "" });
             RenderChunk.renderChunksUpdated = 0;
             this.debugUpdateTime += 1000L;
             this.fpsCounter = 0;
             this.usageSnooper.addMemoryStatsToSnooper();
 
-            if (!this.usageSnooper.isSnooperRunning())
-            {
+            if (!this.usageSnooper.isSnooperRunning()) {
                 this.usageSnooper.startSnooper();
             }
         }
 
-        if (this.isFramerateLimitBelowMax())
-        {
+        if (this.isFramerateLimitBelowMax()) {
             this.mcProfiler.startSection("fpslimit_wait");
             Display.sync(this.getLimitFramerate());
             this.mcProfiler.endSection();
@@ -460,6 +470,7 @@ public abstract class MixinMinecraft {
 
         this.mcProfiler.endSection();
     }
+
     @Inject(method = "runTick", at = @At("HEAD"))
     private void runTick(final CallbackInfo callbackInfo) {
         StaticStorage.scaledResolution = new ScaledResolution((Minecraft) (Object) this);
@@ -474,21 +485,37 @@ public abstract class MixinMinecraft {
             gameSettings.thirdPersonView = value;
         }
     }
+
     @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/settings/KeyBinding;isPressed()Z", ordinal = 0))
     private void changeItem(CallbackInfo info) {
 
-        for(int k = 0; k < 9; ++k) {
+        for (int k = 0; k < 9; ++k) {
             if (this.gameSettings.keyBindsHotbar[k].isPressed()) {
                 if (this.thePlayer.isSpectator()) {
                     this.ingameGUI.getSpectatorGui().func_175260_a(k);
                 } else {
-                    if(SpoofItemUtils.INSTANCE.getSpoofing()) {
-                        SpoofItemUtils.INSTANCE.setSlot(k);
-                    } else {
-                        this.thePlayer.inventory.currentItem = k;
+                    // Fire SlotSwitchEvent for 1-9 keys
+                    SlotSwitchEvent event = new SlotSwitchEvent(k, 0);
+                    CrossSine.eventManager.callEvent(event);
+                    if (!event.isCancelled()) {
+                        if (SpoofItemUtils.INSTANCE.getSpoofing()) {
+                            SpoofItemUtils.INSTANCE.setSlot(k);
+                        } else {
+                            this.thePlayer.inventory.currentItem = k;
+                        }
                     }
                 }
             }
+        }
+    }
+
+    // Redirect scroll wheel slot changes to fire SlotSwitchEvent
+    @Redirect(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;changeCurrentItem(I)V"))
+    private void changeCurrentItem(InventoryPlayer inventoryPlayer, int offset) {
+        SlotSwitchEvent event = new SlotSwitchEvent(-1, offset);
+        CrossSine.eventManager.callEvent(event);
+        if (!event.isCancelled()) {
+            inventoryPlayer.changeCurrentItem(offset);
         }
     }
 
@@ -498,20 +525,23 @@ public abstract class MixinMinecraft {
     }
 
     private static final String TARGET = "Lnet/minecraft/client/settings/KeyBinding;setKeyBindState(IZ)V";
-    @Redirect(method="runTick", at=@At(value="INVOKE", target=TARGET))
+
+    @Redirect(method = "runTick", at = @At(value = "INVOKE", target = TARGET))
     public void runTick_setKeyBindState(int keybind, boolean state) {
         leftClickCounter = 0;
 
         KeyBinding.setKeyBindState(keybind, state);
     }
+
     @Inject(method = "dispatchKeypresses", at = @At(value = "HEAD"))
     private void onKey(CallbackInfo callbackInfo) {
         final KeyBindEvent event = new KeyBindEvent();
         try {
             if (Keyboard.getEventKeyState() && (currentScreen == null))
-                CrossSine.eventManager.callEvent(new KeyEvent(Keyboard.getEventKey() == 0 ? Keyboard.getEventCharacter() + 256 : Keyboard.getEventKey()));
+                CrossSine.eventManager.callEvent(new KeyEvent(
+                        Keyboard.getEventKey() == 0 ? Keyboard.getEventCharacter() + 256 : Keyboard.getEventKey()));
         } catch (Exception e) {
-            //e.printStackTrace();
+            // e.printStackTrace();
         }
         try {
             if (Keyboard.getEventKeyState()) {
@@ -519,7 +549,7 @@ public abstract class MixinMinecraft {
                 CrossSine.eventManager.callEvent(event);
             }
         } catch (Exception e) {
-            //e.printStackTrace();
+            // e.printStackTrace();
         }
     }
 
@@ -534,20 +564,22 @@ public abstract class MixinMinecraft {
         CPSCounter.registerClick(CPSCounter.MouseButton.LEFT);
         leftClickCounter = 0;
     }
+
     @Inject(method = "rightClickMouse", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;rightClickDelayTimer:I", shift = At.Shift.AFTER))
     private void rightClickMouse(final CallbackInfo callbackInfo) {
         CPSCounter.registerClick(CPSCounter.MouseButton.RIGHT);
     }
+
     @Inject(method = "middleClickMouse", at = @At("HEAD"))
     private void middleClickMouse(CallbackInfo ci) {
         CPSCounter.registerClick(CPSCounter.MouseButton.MIDDLE);
     }
 
-
     @Inject(method = "loadWorld(Lnet/minecraft/client/multiplayer/WorldClient;Ljava/lang/String;)V", at = @At("HEAD"))
     private void loadWorld(WorldClient p_loadWorld_1_, String p_loadWorld_2_, final CallbackInfo callbackInfo) {
         CrossSine.eventManager.callEvent(new WorldEvent(p_loadWorld_1_));
     }
+
     /**
      * @author CCBlueX
      * @reason
@@ -556,12 +588,13 @@ public abstract class MixinMinecraft {
     private void setWindowIcon(CallbackInfo callbackInfo) {
         try {
             if (Util.getOSType() != Util.EnumOS.OSX) {
-                BufferedImage image = ImageIO.read(this.getClass().getResourceAsStream("/assets/minecraft/CrossSine/misc/icon.png"));
+                BufferedImage image = ImageIO
+                        .read(this.getClass().getResourceAsStream("/assets/minecraft/CrossSine/misc/icon.png"));
                 ByteBuffer bytebuffer = ImageUtils.readImageToBuffer(ImageUtils.resizeImage(image, 16, 16));
                 if (bytebuffer == null) {
                     throw new Exception("Error when loading image.");
                 } else {
-                    Display.setIcon(new ByteBuffer[]{bytebuffer, ImageUtils.readImageToBuffer(image)});
+                    Display.setIcon(new ByteBuffer[] { bytebuffer, ImageUtils.readImageToBuffer(image) });
                     callbackInfo.cancel();
                 }
             }

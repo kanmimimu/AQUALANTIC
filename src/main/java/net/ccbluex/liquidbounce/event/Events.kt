@@ -254,3 +254,24 @@ class WorldEvent(val worldClient: WorldClient?) : Event()
  */
 class ClickWindowEvent(val windowId: Int, val slotId: Int, val mouseButtonClicked: Int, val mode: Int) :
     CancellableEvent()
+
+/**
+ * Called when player tries to switch hotbar slot (scroll or 1-9 keys)
+ * Myau-style implementation for Scaffold item spoof
+ *
+ * @param slot Direct slot selection (0-8), or -1 if using scroll
+ * @param offset Scroll direction (-1, 0, or 1)
+ */
+class SlotSwitchEvent(val slot: Int, offset: Int) : CancellableEvent() {
+    // Clamp offset to -1, 0, or 1 (like Myau)
+    val clampedOffset = offset.coerceIn(-1, 1)
+    
+    /**
+     * Calculate the new slot based on current slot
+     * If slot is directly specified (0-8), return that
+     * Otherwise calculate based on clamped scroll offset
+     */
+    fun calculateNewSlot(current: Int): Int {
+        return if (slot in 0..8) slot else Math.floorMod(current - clampedOffset, 9)
+    }
+}

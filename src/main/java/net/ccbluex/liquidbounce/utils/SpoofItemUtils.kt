@@ -40,10 +40,24 @@ object SpoofItemUtils : Listenable{
     }
 
     fun getSlot(): Int {
+        // Scaffold Spoof優先
+        val scaffoldSlot = net.ccbluex.liquidbounce.features.module.modules.player.Scaffold.getSlot()
+        if (scaffoldSlot >= 0) return scaffoldSlot
+        // AutoItem Spoof
+        val autoItemSlot = net.ccbluex.liquidbounce.features.module.modules.player.AutoItem.getSlot()
+        if (autoItemSlot >= 0) return autoItemSlot
+        // 既存のspoof
         return if (spoofing) spoofSlot else mc.thePlayer.inventory.currentItem
     }
 
     fun getStack(): ItemStack? {
+        // Scaffold Spoof優先
+        val scaffoldSlot = net.ccbluex.liquidbounce.features.module.modules.player.Scaffold.getSlot()
+        if (scaffoldSlot >= 0) return mc.thePlayer.inventory.getStackInSlot(scaffoldSlot)
+        // AutoItem Spoof
+        val autoItemSlot = net.ccbluex.liquidbounce.features.module.modules.player.AutoItem.getSlot()
+        if (autoItemSlot >= 0) return mc.thePlayer.inventory.getStackInSlot(autoItemSlot)
+        // 既存のspoof
         return if (spoofing) mc.thePlayer.inventory.getStackInSlot(spoofSlot) else mc.thePlayer.inventory.getCurrentItem()
     }
 

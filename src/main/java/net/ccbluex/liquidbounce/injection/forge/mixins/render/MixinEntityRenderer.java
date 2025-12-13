@@ -37,11 +37,12 @@ import java.util.Objects;
 
 import static org.objectweb.asm.Opcodes.GETFIELD;
 
-
 @Mixin(EntityRenderer.class)
 public abstract class MixinEntityRenderer {
 
-    protected MixinEntityRenderer(int[] lightmapColors, DynamicTexture lightmapTexture, float torchFlickerX, float bossColorModifier, float bossColorModifierPrev, Minecraft mc, float thirdPersonDistanceTemp, float thirdPersonDistance) {
+    protected MixinEntityRenderer(int[] lightmapColors, DynamicTexture lightmapTexture, float torchFlickerX,
+            float bossColorModifier, float bossColorModifierPrev, Minecraft mc, float thirdPersonDistanceTemp,
+            float thirdPersonDistance) {
         this.lightmapColors = lightmapColors;
         this.lightmapTexture = lightmapTexture;
         this.torchFlickerX = torchFlickerX;
@@ -51,14 +52,18 @@ public abstract class MixinEntityRenderer {
         this.thirdPersonDistanceTemp = thirdPersonDistanceTemp;
         this.thirdPersonDistance = thirdPersonDistance;
     }
+
     @Shadow
     public abstract void loadShader(ResourceLocation resourceLocationIn);
+
     @Shadow
     private final int[] lightmapColors;
     @Shadow
     private final DynamicTexture lightmapTexture;
+
     @Shadow
     public abstract void setupCameraTransform(float partialTicks, int pass);
+
     @Shadow
     private float torchFlickerX;
 
@@ -84,6 +89,37 @@ public abstract class MixinEntityRenderer {
 
     @Shadow
     private boolean cloudFog;
+
+    // Myau-style item spoof: store original slot during rendering
+    private Integer spoofedSlot = null;
+
+    private int getSpoofSlot() {
+        int slot = net.ccbluex.liquidbounce.features.module.modules.player.Scaffold.INSTANCE.getSlot();
+        if (slot >= 0)
+            return slot;
+        slot = net.ccbluex.liquidbounce.features.module.modules.player.AutoItem.INSTANCE.getSlot();
+        return slot;
+    }
+
+    @Inject(method = "updateCameraAndRender", at = @At("HEAD"))
+    private void updateCameraAndRenderHead(float partialTicks, long nanoTime, CallbackInfo ci) {
+        if (mc.thePlayer != null) {
+            int slot = getSpoofSlot();
+            if (slot >= 0) {
+                this.spoofedSlot = mc.thePlayer.inventory.currentItem;
+                mc.thePlayer.inventory.currentItem = slot;
+            }
+        }
+    }
+
+    @Inject(method = "updateCameraAndRender", at = @At("RETURN"))
+    private void updateCameraAndRenderReturn(float partialTicks, long nanoTime, CallbackInfo ci) {
+        if (this.spoofedSlot != null) {
+            mc.thePlayer.inventory.currentItem = this.spoofedSlot;
+            this.spoofedSlot = null;
+        }
+    }
+
     @Inject(method = "renderWorldPass", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/EntityRenderer;renderHand:Z", shift = At.Shift.BEFORE))
     private void renderWorldPass(int pass, float partialTicks, long finishTimeNano, CallbackInfo callbackInfo) {
         CrossSine.eventManager.callEvent(new Render3DEvent(partialTicks));
@@ -95,6 +131,7 @@ public abstract class MixinEntityRenderer {
             callbackInfo.cancel();
         }
     }
+
     @Inject(method = "orientCamera", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Vec3;distanceTo(Lnet/minecraft/util/Vec3;)D"), cancellable = true)
     private void cameraClip(float partialTicks, CallbackInfo callbackInfo) {
         if (CrossSine.moduleManager.getModule(CameraClip.class).getState()) {
@@ -110,13 +147,18 @@ public abstract class MixinEntityRenderer {
                 if (!this.mc.gameSettings.debugCamEnable) {
                     BlockPos blockpos = new BlockPos(entity);
                     IBlockState iblockstate = this.mc.theWorld.getBlockState(blockpos);
-                    net.minecraftforge.client.ForgeHooksClient.orientBedCamera(this.mc.theWorld, blockpos, iblockstate, entity);
+                    net.minecraftforge.client.ForgeHooksClient.orientBedCamera(this.mc.theWorld, blockpos, iblockstate,
+                            entity);
 
-                    GlStateManager.rotate(entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * partialTicks + 180.0F, 0.0F, -1.0F, 0.0F);
-                    GlStateManager.rotate(entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks, -1.0F, 0.0F, 0.0F);
+                    GlStateManager.rotate(entity.prevRotationYaw
+                            + (entity.rotationYaw - entity.prevRotationYaw) * partialTicks + 180.0F, 0.0F, -1.0F, 0.0F);
+                    GlStateManager.rotate(
+                            entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks,
+                            -1.0F, 0.0F, 0.0F);
                 }
             } else if (this.mc.gameSettings.thirdPersonView > 0) {
-                double d3 = this.thirdPersonDistanceTemp + (this.thirdPersonDistance - this.thirdPersonDistanceTemp) * partialTicks;
+                double d3 = this.thirdPersonDistanceTemp
+                        + (this.thirdPersonDistance - this.thirdPersonDistanceTemp) * partialTicks;
 
                 if (this.mc.gameSettings.debugCamEnable) {
                     GlStateManager.translate(0.0F, 0.0F, (float) (-d3));
@@ -141,16 +183,20 @@ public abstract class MixinEntityRenderer {
             }
 
             if (!this.mc.gameSettings.debugCamEnable) {
-                float yaw = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * partialTicks + 180.0F;
-                float pitch = entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks;
+                float yaw = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * partialTicks
+                        + 180.0F;
+                float pitch = entity.prevRotationPitch
+                        + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks;
                 float roll = 0.0F;
                 if (entity instanceof EntityAnimal) {
                     EntityAnimal entityanimal = (EntityAnimal) entity;
-                    yaw = entityanimal.prevRotationYawHead + (entityanimal.rotationYawHead - entityanimal.prevRotationYawHead) * partialTicks + 180.0F;
+                    yaw = entityanimal.prevRotationYawHead
+                            + (entityanimal.rotationYawHead - entityanimal.prevRotationYawHead) * partialTicks + 180.0F;
                 }
 
                 Block block = ActiveRenderInfo.getBlockAtEntityViewpoint(this.mc.theWorld, entity, partialTicks);
-                net.minecraftforge.client.event.EntityViewRenderEvent.CameraSetup event = new net.minecraftforge.client.event.EntityViewRenderEvent.CameraSetup((EntityRenderer) (Object) this, entity, block, partialTicks, yaw, pitch, roll);
+                net.minecraftforge.client.event.EntityViewRenderEvent.CameraSetup event = new net.minecraftforge.client.event.EntityViewRenderEvent.CameraSetup(
+                        (EntityRenderer) (Object) this, entity, block, partialTicks, yaw, pitch, roll);
                 net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event);
                 GlStateManager.rotate(event.roll, 0.0F, 0.0F, 1.0F);
                 GlStateManager.rotate(event.pitch, 1.0F, 0.0F, 0.0F);
@@ -167,18 +213,19 @@ public abstract class MixinEntityRenderer {
 
     @Inject(method = "setupCameraTransform", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/EntityRenderer;setupViewBobbing(F)V", shift = At.Shift.BEFORE))
     private void setupCameraViewBobbingBefore(final CallbackInfo callbackInfo) {
-        if (CrossSine.moduleManager.getModule(Tracers.class).getState()) GL11.glPushMatrix();
+        if (CrossSine.moduleManager.getModule(Tracers.class).getState())
+            GL11.glPushMatrix();
     }
 
     @Inject(method = "setupCameraTransform", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/EntityRenderer;setupViewBobbing(F)V", shift = At.Shift.AFTER))
     private void setupCameraViewBobbingAfter(final CallbackInfo callbackInfo) {
-        if (CrossSine.moduleManager.getModule(Tracers.class).getState()) GL11.glPopMatrix();
+        if (CrossSine.moduleManager.getModule(Tracers.class).getState())
+            GL11.glPopMatrix();
     }
 
     /**
      * @author Liuli
      */
-
 
     @Redirect(method = "updateCameraAndRender", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;inGameHasFocus:Z", opcode = GETFIELD))
     public boolean updateCameraAndRender(Minecraft minecraft) {
@@ -187,8 +234,10 @@ public abstract class MixinEntityRenderer {
         if (freeLook.getState()) {
             if (!freeLook.getReverse().get())
                 return freeLook.overrideMouse();
-            else return true;
-        } else return mc.inGameHasFocus && Display.isActive();
+            else
+                return true;
+        } else
+            return mc.inGameHasFocus && Display.isActive();
     }
 
     @Redirect(method = "orientCamera", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;rotationYaw:F", opcode = GETFIELD))
@@ -202,6 +251,7 @@ public abstract class MixinEntityRenderer {
         final FreeLook freeLook = (FreeLook) CrossSine.moduleManager.getModule(FreeLook.class);
         return freeLook.isPerspectiveToggled() ? freeLook.getCameraYaw() : entity.prevRotationYaw;
     }
+
     @Redirect(method = "orientCamera", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;rotationPitch:F", opcode = GETFIELD))
     public float getRotationPitch(Entity entity) {
         final FreeLook freeLook = (FreeLook) CrossSine.moduleManager.getModule(FreeLook.class);
@@ -210,13 +260,16 @@ public abstract class MixinEntityRenderer {
 
     @Redirect(method = "setupCameraTransform", at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;viewBobbing:Z", ordinal = 0))
     public boolean setupCameraTransform(GameSettings instance) {
-        return !CrossSine.moduleManager.getModule(ViewBobing.class).getMiniViewBobing().get() && CrossSine.moduleManager.getModule(ViewBobing.class).getState() && mc.gameSettings.viewBobbing;
+        return !CrossSine.moduleManager.getModule(ViewBobing.class).getMiniViewBobing().get()
+                && CrossSine.moduleManager.getModule(ViewBobing.class).getState() && mc.gameSettings.viewBobbing;
     }
+
     @Redirect(method = "orientCamera", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;prevRotationPitch:F"))
     public float getPrevRotationPitch(Entity entity) {
         final FreeLook freeLook = (FreeLook) CrossSine.moduleManager.getModule(FreeLook.class);
         return freeLook.isPerspectiveToggled() ? freeLook.getCameraPitch() : entity.prevRotationPitch;
     }
+
     @Inject(method = "getMouseOver", at = @At("HEAD"), cancellable = true)
     private void getMouseOver(float p_getMouseOver_1_, CallbackInfo ci) {
         Entity entity = mc.getRenderViewEntity();
@@ -227,7 +280,8 @@ public abstract class MixinEntityRenderer {
             double d0 = mc.playerController.getBlockReachDistance();
             Vec3 vec3 = entity.getPositionEyes(p_getMouseOver_1_);
             Rotation rotation = new Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
-            Vec3 vec31 = RotationUtils.getVectorForRotation(RotationUtils.targetRotation != null ? RotationUtils.targetRotation : rotation);
+            Vec3 vec31 = RotationUtils.getVectorForRotation(
+                    RotationUtils.targetRotation != null ? RotationUtils.targetRotation : rotation);
             Vec3 vec32 = vec3.addVector(vec31.xCoord * d0, vec31.yCoord * d0, vec31.zCoord * d0);
             mc.objectMouseOver = entity.worldObj.rayTraceBlocks(vec3, vec32, false, false, true);
             double d1 = d0;
@@ -245,7 +299,8 @@ public abstract class MixinEntityRenderer {
 
             pointedEntity = null;
             Vec3 vec33 = null;
-            List<Entity> list = mc.theWorld.getEntities(Entity.class, Predicates.and(EntitySelectors.NOT_SPECTATING, p_apply_1_ -> p_apply_1_ != null && p_apply_1_.canBeCollidedWith() && p_apply_1_ != entity));
+            List<Entity> list = mc.theWorld.getEntities(Entity.class, Predicates.and(EntitySelectors.NOT_SPECTATING,
+                    p_apply_1_ -> p_apply_1_ != null && p_apply_1_.canBeCollidedWith() && p_apply_1_ != entity));
             double d2 = d1;
 
             for (Entity entity1 : list) {
@@ -280,9 +335,11 @@ public abstract class MixinEntityRenderer {
                 }
             }
 
-            if (pointedEntity != null && flag && vec3.distanceTo(vec33) > (Reach.INSTANCE.getState() ? Reach.INSTANCE.getReach() : 3)) {
+            if (pointedEntity != null && flag
+                    && vec3.distanceTo(vec33) > (Reach.INSTANCE.getState() ? Reach.INSTANCE.getReach() : 3)) {
                 pointedEntity = null;
-                mc.objectMouseOver = new MovingObjectPosition(MovingObjectPosition.MovingObjectType.MISS, Objects.requireNonNull(vec33), null, new BlockPos(vec33));
+                mc.objectMouseOver = new MovingObjectPosition(MovingObjectPosition.MovingObjectType.MISS,
+                        Objects.requireNonNull(vec33), null, new BlockPos(vec33));
             }
 
             if (pointedEntity != null && (d2 < d1 || mc.objectMouseOver == null)) {
@@ -297,8 +354,11 @@ public abstract class MixinEntityRenderer {
 
         ci.cancel();
     }
-    private float getNightVisionBrightness(EntityLivingBase p_getNightVisionBrightness_1_, float p_getNightVisionBrightness_2_) {
+
+    private float getNightVisionBrightness(EntityLivingBase p_getNightVisionBrightness_1_,
+            float p_getNightVisionBrightness_2_) {
         int i = p_getNightVisionBrightness_1_.getActivePotionEffect(Potion.nightVision).getDuration();
-        return i > 200 ? 1.0F : 0.7F + MathHelper.sin(((float) i - p_getNightVisionBrightness_2_) * 3.1415927F * 0.2F) * 0.3F;
+        return i > 200 ? 1.0F
+                : 0.7F + MathHelper.sin(((float) i - p_getNightVisionBrightness_2_) * 3.1415927F * 0.2F) * 0.3F;
     }
 }

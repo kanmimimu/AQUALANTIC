@@ -5,7 +5,6 @@ import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.ModuleInfo
 import net.ccbluex.liquidbounce.features.value.BoolValue
-import net.ccbluex.liquidbounce.utils.SpoofItemUtils
 import net.ccbluex.liquidbounce.utils.item.ItemUtils
 import net.minecraft.enchantment.Enchantment
 import net.minecraft.item.ItemShears
@@ -22,13 +21,35 @@ object AutoItem : Module() {
     private val autoWeapon = BoolValue("AutoWeapon", false)
     private val onlySwordValue = BoolValue("OnlySword", false).displayable { autoWeapon.get() }
     private val spoof = BoolValue("Spoof-Item", true)
-    private val render = BoolValue("Render", false)
-    private var prevItem = 0
+
+    // Myau-style item spoof
+    @JvmField
+    var lastSlot = -1
     private var mining = false
     private var bestSlot = 0
     private var attackEnemy = false
-    private var prevItemWeapon = 0
     private var spoofTick = 0
+
+    override fun onEnable() {
+        lastSlot = -1
+        mining = false
+        spoofTick = 0
+    }
+
+    override fun onDisable() {
+        if (lastSlot >= 0 && lastSlot <= 8) {
+            mc.thePlayer?.inventory?.currentItem = lastSlot
+        }
+        lastSlot = -1
+    }
+
+    @EventTarget
+    fun onSlotSwitch(event: SlotSwitchEvent) {
+        if (state && spoof.get() && lastSlot >= 0) {
+            lastSlot = event.calculateNewSlot(lastSlot)
+            event.cancelEvent()
+        }
+    }
 
     @EventTarget
     fun onRender2D(event: Render2DEvent) {
@@ -37,9 +58,7 @@ object AutoItem : Module() {
 
                 var bestSpeed = 0
                 if (!mining) {
-                    prevItem = mc.thePlayer.inventory.currentItem
-                    if (spoof.get())
-                        SpoofItemUtils.startSpoof(prevItem, render.get())
+                    lastSlot = mc.thePlayer.inventory.currentItem
                 }
 
                 val block = mc.theWorld.getBlockState(mc.objectMouseOver.blockPos).block
@@ -62,14 +81,11 @@ object AutoItem : Module() {
                 mining = true
             } else {
                 if (mining) {
-                    if (spoof.get()) {
-                        SpoofItemUtils.stopSpoof()
-                    } else {
-                        mc.thePlayer.inventory.currentItem = prevItem
+                    if (spoof.get() && lastSlot >= 0) {
+                        mc.thePlayer.inventory.currentItem = lastSlot
                     }
+                    lastSlot = -1
                     mining = false
-                } else {
-                    prevItem = mc.thePlayer.inventory.currentItem
                 }
             }
         }
@@ -96,20 +112,17 @@ object AutoItem : Module() {
                             ?: 0.0) + 1.25 * ItemUtils.getEnchantment(it.second, Enchantment.sharpness)
                     } ?: return
 
-                if (slot == mc.thePlayer.inventory.currentItem) { // If in hand no need to swap
+                if (slot == mc.thePlayer.inventory.currentItem) {
                     return
                 }
 
                 // Switch to best weapon
-                if (!SpoofItemUtils.spoofing) {
-                    prevItemWeapon = mc.thePlayer.inventory.currentItem
-                    if (spoof.get())
-                        SpoofItemUtils.startSpoof(prevItemWeapon, render.get())
+                if (lastSlot < 0) {
+                    lastSlot = mc.thePlayer.inventory.currentItem
                 }
                 spoofTick = 15
                 mc.thePlayer.inventory.currentItem = slot
                 mc.playerController.updateController()
-
 
                 // Resend attack packet
                 mc.netHandler.addToSendQueue(event.packet)
@@ -122,12 +135,18 @@ object AutoItem : Module() {
     fun onUpdate(event: UpdateEvent) {
         if (autoWeapon.get()) {
             if (spoofTick > 0) {
-                if (spoofTick == 1) {
-                    mc.thePlayer.inventory.currentItem = prevItemWeapon
-                    SpoofItemUtils.stopSpoof()
+                if (spoofTick == 1 && lastSlot >= 0) {
+                    mc.thePlayer.inventory.currentItem = lastSlot
+                    lastSlot = -1
                 }
                 spoofTick--
             }
         }
     }
+
+    @JvmStatic
+    fun getSlot(): Int {
+        return if (state && spoof.get() && lastSlot >= 0) lastSlot else -1
+    }
 }
+
