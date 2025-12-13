@@ -599,7 +599,7 @@ object Scaffold : Module() {
             }
         }
         if (InventoryUtils.findAutoBlockBlock(highBlock.get()) != -1) {
-            findBlock(expandLengthValue.get() > 1)
+            findBlock(expandLengthValue.get() > 1 && !towerStatus)
             if (towerStatus) {
                 move()
             }
