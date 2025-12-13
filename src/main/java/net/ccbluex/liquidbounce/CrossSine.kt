@@ -14,7 +14,7 @@ import net.ccbluex.liquidbounce.file.config.ConfigManager
 import net.ccbluex.liquidbounce.script.ScriptManager
 import net.ccbluex.liquidbounce.ui.client.gui.ClickGUIModule
 import net.ccbluex.liquidbounce.ui.client.gui.ClickGuiConfig
-import net.ccbluex.liquidbounce.ui.client.gui.GuiMainMenu
+import net.ccbluex.liquidbounce.ui.client.gui.m3.M3MainMenu
 import net.ccbluex.liquidbounce.ui.client.gui.clickgui.ClickGui
 import net.ccbluex.liquidbounce.ui.client.hud.HUD
 import net.ccbluex.liquidbounce.ui.client.keybind.KeyBindManager
@@ -137,7 +137,7 @@ object CrossSine {
         combatManager = CombatManager()
         eventManager.registerListener(combatManager)
 
-        mainMenu = GuiMainMenu()
+        mainMenu = M3MainMenu()
         moduleManager.registerModule(ClickGUIModule())
 
         clickGui = ClickGui()
