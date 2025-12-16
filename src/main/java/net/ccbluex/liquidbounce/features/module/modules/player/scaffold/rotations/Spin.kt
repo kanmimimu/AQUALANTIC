@@ -1,6 +1,5 @@
 package net.ccbluex.liquidbounce.features.module.modules.player.scaffold.rotations
 
-import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.utils.Rotation
 
 class Spin : ScaffoldRotation("Spin") {

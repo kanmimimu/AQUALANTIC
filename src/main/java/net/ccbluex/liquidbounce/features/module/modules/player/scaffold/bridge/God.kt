@@ -1,6 +1,5 @@
 package net.ccbluex.liquidbounce.features.module.modules.player.scaffold.bridge
 
-import net.ccbluex.liquidbounce.features.module.modules.player.scaffold.ScaffoldMisc
 import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.ccbluex.liquidbounce.utils.misc.RandomUtils
 import net.minecraft.util.BlockPos
@@ -10,7 +9,7 @@ class God(
     private val minBlockPlace: () -> Int,
     private val maxBlockPlace: () -> Int
 ) : Bridge("GodBridge") {
-    
+
     private var godBridgePlaceTicks = 0
     private var randomGodBridgePlaceTicks = 8
 

@@ -35,13 +35,33 @@ class WatchDog2 : ScaffoldRotation("WatchDog2") {
         var minOffset = 11
 
         when {
-            quad <= 5 || quad >= 85 -> { offsetYawAngle = 126.425f; minOffset = 11; offsetMinPitch = first }
-            quad > 5 && quad <= 15 || quad >= 75 && quad < 85 -> { offsetYawAngle = 127.825f; minOffset = 9; offsetMinPitch = first }
-            quad > 15 && quad <= 25 || quad >= 65 && quad < 75 -> { offsetYawAngle = 129.625f; minOffset = 8; offsetMinPitch = first }
-            quad > 25 && quad <= 32 || quad >= 58 && quad < 65 -> { offsetYawAngle = 130.485f; minOffset = 7; offsetMinPitch = sec }
-            quad > 32 && quad <= 38 || quad >= 52 && quad < 58 -> { offsetYawAngle = 133.485f; minOffset = 6; offsetMinPitch = sec }
-            quad > 38 && quad <= 42 || quad >= 48 && quad < 52 -> { offsetYawAngle = 135.625f; minOffset = 4; offsetMinPitch = sec }
-            quad > 42 && quad <= 45 || quad >= 45 && quad < 48 -> { offsetYawAngle = 137.625f; minOffset = 3; offsetMinPitch = sec }
+            quad <= 5 || quad >= 85 -> {
+                offsetYawAngle = 126.425f; minOffset = 11; offsetMinPitch = first
+            }
+
+            quad > 5 && quad <= 15 || quad >= 75 && quad < 85 -> {
+                offsetYawAngle = 127.825f; minOffset = 9; offsetMinPitch = first
+            }
+
+            quad > 15 && quad <= 25 || quad >= 65 && quad < 75 -> {
+                offsetYawAngle = 129.625f; minOffset = 8; offsetMinPitch = first
+            }
+
+            quad > 25 && quad <= 32 || quad >= 58 && quad < 65 -> {
+                offsetYawAngle = 130.485f; minOffset = 7; offsetMinPitch = sec
+            }
+
+            quad > 32 && quad <= 38 || quad >= 52 && quad < 58 -> {
+                offsetYawAngle = 133.485f; minOffset = 6; offsetMinPitch = sec
+            }
+
+            quad > 38 && quad <= 42 || quad >= 48 && quad < 52 -> {
+                offsetYawAngle = 135.625f; minOffset = 4; offsetMinPitch = sec
+            }
+
+            quad > 42 && quad <= 45 || quad >= 45 && quad < 48 -> {
+                offsetYawAngle = 137.625f; minOffset = 3; offsetMinPitch = sec
+            }
         }
 
         val offset = offsetYawAngle
@@ -54,7 +74,8 @@ class WatchDog2 : ScaffoldRotation("WatchDog2") {
             offsetFirstStroke = 0
         }
 
-        val usePitch = if (lockRotation != null && lockRotation.pitch >= offsetMinPitch) lockRotation.pitch else offsetMinPitch
+        val usePitch =
+            if (lockRotation != null && lockRotation.pitch >= offsetMinPitch) lockRotation.pitch else offsetMinPitch
 
         if (!MovementUtils.isMoving() || MovementUtils.getSpeed() <= 0.001) {
             return Rotation(offsetTheYaw, usePitch)
@@ -78,7 +99,7 @@ class WatchDog2 : ScaffoldRotation("WatchDog2") {
             }
         }
 
-        val minSwitch = if (!ScaffoldMisc.isDiagonal(mc.thePlayer.rotationYaw)) 9 else 15
+        if (!ScaffoldMisc.isDiagonal(mc.thePlayer.rotationYaw)) 9 else 15
         val calcOffset = blockYawOffset.coerceIn(-minOffset.toFloat(), minOffset.toFloat())
 
         offsetTheYaw = if (offsetSet2) {

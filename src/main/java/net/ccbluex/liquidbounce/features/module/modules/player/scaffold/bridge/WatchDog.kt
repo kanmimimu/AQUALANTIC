@@ -6,7 +6,6 @@ import net.ccbluex.liquidbounce.utils.PlayerUtils
 import net.ccbluex.liquidbounce.utils.block.BlockUtils
 import net.minecraft.block.BlockAir
 import net.minecraft.client.settings.GameSettings
-import net.minecraft.potion.Potion
 import net.minecraft.util.BlockPos
 
 class WatchDog(
@@ -42,20 +41,20 @@ class WatchDog(
         if (!watchdogExtraClick() || watchdogBoost() && GameSettings.isKeyDown(mc.gameSettings.keyBindUseItem)) {
             return BlockPos(mc.thePlayer.posX, lastGroundY.toDouble() - 1.0, mc.thePlayer.posZ)
         }
-        
+
         val blockAtGround = BlockUtils.getBlock(
             BlockPos(mc.thePlayer.posX, lastGroundY.toDouble() - 1.0, mc.thePlayer.posZ)
         )
         val blockAboveGround = BlockUtils.getBlock(
             BlockPos(mc.thePlayer.posX, lastGroundY.toDouble(), mc.thePlayer.posZ)
         )
-        
-        val shouldPlaceAbove = blockAtGround !is BlockAir && 
-                               blockAboveGround is BlockAir && 
-                               mc.thePlayer.posY > lastGroundY && 
-                               mc.thePlayer.posY + MovementUtils.predictedMotion(mc.thePlayer.motionY, 3) < lastGroundY + 1 &&
-                               PlayerUtils.offGroundTicks > 1
-        
+
+        val shouldPlaceAbove = blockAtGround !is BlockAir &&
+                blockAboveGround is BlockAir &&
+                mc.thePlayer.posY > lastGroundY &&
+                mc.thePlayer.posY + MovementUtils.predictedMotion(mc.thePlayer.motionY, 3) < lastGroundY + 1 &&
+                PlayerUtils.offGroundTicks > 1
+
         return if (shouldPlaceAbove) {
             BlockPos(mc.thePlayer.posX, lastGroundY.toDouble(), mc.thePlayer.posZ)
         } else {

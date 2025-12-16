@@ -16,6 +16,7 @@ class Extra : Tower("Extra") {
                     mc.thePlayer.motionY = -0.0784000015258789
                 }
             }
+
             1 -> {
                 if (yState == 0 && isReplaceable(
                         BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1.0, mc.thePlayer.posZ)
@@ -27,14 +28,17 @@ class Extra : Tower("Extra") {
                     towerTick = 0
                 }
             }
+
             2 -> {
                 towerTick = 3
                 mc.thePlayer.motionY -= RandomUtils.nextDouble(0.00101, 0.00109)
             }
+
             3 -> {
                 towerTick = 1
                 mc.thePlayer.motionY = 1.0 - mc.thePlayer.posY % 1.0
             }
+
             else -> {
                 towerTick = 0
             }

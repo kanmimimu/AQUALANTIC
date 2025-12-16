@@ -1,7 +1,6 @@
 package net.ccbluex.liquidbounce.features.module.modules.player.scaffold
 
 import net.ccbluex.liquidbounce.utils.MinecraftInstance
-import net.ccbluex.liquidbounce.utils.MovementUtils
 import net.minecraft.client.settings.GameSettings
 import net.minecraft.util.MathHelper
 import kotlin.math.abs
@@ -18,9 +17,9 @@ object ScaffoldMisc : MinecraftInstance() {
         get() {
             val player = mc.thePlayer ?: return false
             val yaw = round(abs(MathHelper.wrapAngleTo180_float(player.rotationYaw)).roundToInt() / 45f) * 45f
-            return floatArrayOf(45f, 135f).any { yaw == it } && 
-                   player.movementInput.moveForward != 0f && 
-                   player.movementInput.moveStrafe == 0f
+            return floatArrayOf(45f, 135f).any { yaw == it } &&
+                    player.movementInput.moveForward != 0f &&
+                    player.movementInput.moveStrafe == 0f
         }
 
     fun isDiagonal(yaw: Float): Boolean {

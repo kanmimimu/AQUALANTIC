@@ -9,7 +9,7 @@ class Custom(
     private val strafeSpeedCustomValue: () -> Float
 ) : Sprint("Custom") {
     override fun isActive(): Boolean = sprintCustom()
-    
+
     override fun onTick() {
         if (strafeCustom()) {
             if (strafeSpeedCustom()) {

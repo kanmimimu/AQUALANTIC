@@ -20,7 +20,6 @@ import net.ccbluex.liquidbounce.utils.block.BlockUtils.isReplaceable
 import net.ccbluex.liquidbounce.utils.block.PlaceInfo
 import net.ccbluex.liquidbounce.utils.extensions.rayTraceWithServerSideRotation
 import net.ccbluex.liquidbounce.utils.extensions.toRadiansD
-import net.ccbluex.liquidbounce.utils.misc.RandomUtils
 import net.ccbluex.liquidbounce.utils.timer.MSTimer
 import net.ccbluex.liquidbounce.utils.timer.TimeUtils
 import net.ccbluex.liquidbounce.utils.timer.TimerMS
@@ -273,6 +272,7 @@ object Scaffold : Module() {
             "Extra" to Extra()
         )
     }
+
     private fun getTowerMode(mode: String): Tower? = towerModes[mode]
 
     // Bridge modes
@@ -327,6 +327,7 @@ object Scaffold : Module() {
     }
     private val currentSprintMode: net.ccbluex.liquidbounce.features.module.modules.player.scaffold.sprint.Sprint?
         get() = sprintModes[sprintModeValue.get()]    // Myau-style item spoof: stores original slot for spoofing
+
     @JvmField
     var lastSlot = -1
     private var prevItem = 0
@@ -456,7 +457,7 @@ object Scaffold : Module() {
         if (!towerStatus) {
             // Handle bridge mode tick
             currentBridgeMode?.onTick()
-            
+
             // Keep-Y specific state management
             if (bridgeMode.equals("Keep-Y")) {
                 canKeepY = true
@@ -659,7 +660,7 @@ object Scaffold : Module() {
 
     private fun rotationStatic() {
         val defaultPitch = lockRotation?.pitch ?: 85F
-        
+
         // Use GodBridge rotation when in GodBridge mode
         if (bridgeMode.equals("GodBridge")) {
             val godRotation = lockRotation ?: Rotation(
@@ -672,10 +673,10 @@ object Scaffold : Module() {
             )
             return
         }
-        
+
         // Get rotation from current mode
         val rotation = currentRotationMode?.getRotation(lockRotation, defaultPitch)
-        
+
         if (rotation != null) {
             RotationUtils.setTargetRotationReverse(
                 RotationUtils.limitAngleChange(RotationUtils.serverRotation, rotation, rotationSpeed),
@@ -1142,7 +1143,6 @@ object Scaffold : Module() {
         }
         return 0.42F
     }
-
 
 
     /**
