@@ -1,5 +1,6 @@
 package net.ccbluex.liquidbounce.features.module.modules.client
 
+import net.ccbluex.liquidbounce.CrossSine
 import net.ccbluex.liquidbounce.event.EventTarget
 import net.ccbluex.liquidbounce.event.ModuleToggleEvent
 import net.ccbluex.liquidbounce.features.module.Module
@@ -11,7 +12,7 @@ import net.minecraft.client.audio.SoundManager
 import paulscode.sound.SoundSystem
 import paulscode.sound.SoundSystemConfig
 
-@ModuleInfo(name = "ToggleSound", category = ModuleCategory.CLIENT)
+@ModuleInfo(name = "ToggleSound", category = ModuleCategory.CLIENT, defaultOn = true)
 class ToggleSound : Module() {
 
     private val soundType = ListValue("SoundType", arrayOf("Epic", "QuickMacro"), "Epic")
@@ -19,31 +20,28 @@ class ToggleSound : Module() {
     private var lastEnableTime = 0L
     private var lastDisableTime = 0L
     private var soundCounter = 0
-
-    private var sndManagerField: java.lang.reflect.Field? = null
-    private var sndSystemField: java.lang.reflect.Field? = null
+    private var cachedSoundSystem: SoundSystem? = null
 
     private fun getSoundSystem(): SoundSystem? {
-        return try {
-            if (sndManagerField == null) {
-                sndManagerField = SoundHandler::class.java.getDeclaredField("sndManager")
-                sndManagerField!!.isAccessible = true
-            }
-            val sndManager = sndManagerField!!.get(mc.soundHandler) as? SoundManager ?: return null
+        cachedSoundSystem?.let { return it }
 
-            if (sndSystemField == null) {
-                sndSystemField = SoundManager::class.java.getDeclaredField("sndSystem")
-                sndSystemField!!.isAccessible = true
-            }
-            sndSystemField!!.get(sndManager) as? SoundSystem
-        } catch (e: Exception) {
-            null
-        }
+        return runCatching {
+            SoundHandler::class.java.declaredFields.asSequence()
+                .onEach { it.isAccessible = true }
+                .mapNotNull { it.get(mc.soundHandler) as? SoundManager }
+                .flatMap { manager ->
+                    SoundManager::class.java.declaredFields.asSequence()
+                        .onEach { it.isAccessible = true }
+                        .mapNotNull { it.get(manager) as? SoundSystem }
+                }
+                .firstOrNull()
+                ?.also { cachedSoundSystem = it }
+        }.getOrNull()
     }
 
     @EventTarget(ignoreCondition = true)
     fun onModuleToggle(event: ModuleToggleEvent) {
-        if (!state || event.module == this) return
+        if (CrossSine.isStarting || !state || event.module == this) return
 
         val now = System.currentTimeMillis()
         val isEnable = event.module.state
@@ -57,15 +55,14 @@ class ToggleSound : Module() {
         }
 
         val action = if (isEnable) "enable" else "disable"
-        val type = soundType.get().lowercase()
-        val path = "assets/crosssine/sounds/toggle/$type/$action.ogg"
+        val path = "/assets/crosssine/sounds/toggle/${soundType.get().lowercase()}/$action.ogg"
 
-        val url = javaClass.classLoader.getResource(path) ?: return
-        val sndSystem = getSoundSystem() ?: return
-
+        val url = ToggleSound::class.java.getResource(path) ?: return
+        val system = getSoundSystem() ?: return
         val source = "toggle_${soundCounter++}"
-        sndSystem.newSource(false, source, url, path, false, 0f, 0f, 0f, SoundSystemConfig.ATTENUATION_NONE, 0f)
-        sndSystem.setVolume(source, 1f)
-        sndSystem.play(source)
+
+        system.newSource(false, source, url, path, false, 0f, 0f, 0f, SoundSystemConfig.ATTENUATION_NONE, 0f)
+        system.setVolume(source, 1f)
+        system.play(source)
     }
 }
