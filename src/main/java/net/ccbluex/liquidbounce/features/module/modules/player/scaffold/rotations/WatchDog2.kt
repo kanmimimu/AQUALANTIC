@@ -40,21 +40,27 @@ class WatchDog2 : ScaffoldRotation("WatchDog2") {
             quad <= 5 || quad >= 85 -> {
                 yawAngle = 126.425f; minOffset = 11; minPitch = first
             }
+
             quad > 5 && quad <= 15 || quad >= 75 && quad < 85 -> {
                 yawAngle = 127.825f; minOffset = 9; minPitch = first
             }
+
             quad > 15 && quad <= 25 || quad >= 65 && quad < 75 -> {
                 yawAngle = 129.625f; minOffset = 8; minPitch = first
             }
+
             quad > 25 && quad <= 32 || quad >= 58 && quad < 65 -> {
                 yawAngle = 130.485f; minOffset = 7; minPitch = sec
             }
+
             quad > 32 && quad <= 38 || quad >= 52 && quad < 58 -> {
                 yawAngle = 133.485f; minOffset = 6; minPitch = sec
             }
+
             quad > 38 && quad <= 42 || quad >= 48 && quad < 52 -> {
                 yawAngle = 135.625f; minOffset = 4; minPitch = sec
             }
+
             quad > 42 && quad <= 45 || quad >= 45 && quad < 48 -> {
                 yawAngle = 137.625f; minOffset = 3; minPitch = sec
             }

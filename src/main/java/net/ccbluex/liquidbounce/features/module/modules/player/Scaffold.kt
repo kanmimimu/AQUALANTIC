@@ -172,7 +172,12 @@ object Scaffold : Module() {
     private val downValue = BoolValue("Downward", false)
     private val safeWalkValue = BoolValue("SafeWalk", false)
     private val jumpFacingForward = BoolValue("JumpFacingForward", false).displayable { !rotationsValue.equals("None") }
-    private val jumpFacingForwardTicks = IntegerValue("JumpFacingForwardTicks", 5, 1, 10).displayable { jumpFacingForward.get() && jumpFacingForward.displayable }
+    private val jumpFacingForwardTicks = IntegerValue(
+        "JumpFacingForwardTicks",
+        5,
+        1,
+        10
+    ).displayable { jumpFacingForward.get() && jumpFacingForward.displayable }
     private val zitterModeValue = BoolValue("Zitter", false)
     private val rotationSpeedValue = BoolValue("RotationSpeed", true)
     private val maxRotationSpeedValue: IntegerValue = object : IntegerValue("MaxRotationSpeed", 180, 0, 180) {
@@ -712,7 +717,7 @@ object Scaffold : Module() {
             }
             RotationUtils.setTargetRotationReverse(finalRotation, 1, 0)
         }
-        
+
         handleRotationDelayCountdown()
     }
 
@@ -731,7 +736,11 @@ object Scaffold : Module() {
             // Disable during active tower modes except Timer/AdvancedTimer/None
             if (towerStatus) {
                 val towerMode = if (MovementUtils.isMoving()) towerHorizontalValue.get() else towerVerticalValue.get()
-                if (!towerMode.equals("Timer", true) && !towerMode.equals("AdvancedTimer", true) && !towerMode.equals("None", true)) {
+                if (!towerMode.equals("Timer", true) && !towerMode.equals(
+                        "AdvancedTimer",
+                        true
+                    ) && !towerMode.equals("None", true)
+                ) {
                     return
                 }
             }
@@ -821,6 +830,7 @@ object Scaffold : Module() {
             else -> false
         }
     }
+
     /**
      * Search for new target block
      */

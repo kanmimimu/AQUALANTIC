@@ -10,12 +10,12 @@ import net.minecraft.util.EnumFacing
 import net.minecraft.util.MathHelper
 import net.minecraft.util.MovingObjectPosition
 import kotlin.math.abs
+import kotlin.math.atan2
 import kotlin.math.sign
 import kotlin.math.sqrt
-import kotlin.math.atan2
 
 class Default : ScaffoldRotation("Default") {
-    
+
     companion object {
         private val PLACE_OFFSETS = doubleArrayOf(
             0.03125, 0.09375, 0.15625, 0.21875,
@@ -55,15 +55,15 @@ class Default : ScaffoldRotation("Default") {
     override fun getRotation(lockRotation: Rotation?, defaultPitch: Float): Rotation? {
         val player = mc.thePlayer ?: return lockRotation
         val serverYaw = RotationUtils.serverRotation.yaw
-        
+
         val currentYaw = adjustYaw(
             player.rotationYaw,
             getForwardValue().toFloat(),
             getLeftValue().toFloat()
         )
-        
+
         val yawDiffTo180 = serverYaw + MathHelper.wrapAngleTo180_float((currentYaw - 180.0f) - serverYaw)
-        
+
         val diagonalYaw = if (isDiagonal(currentYaw)) {
             yawDiffTo180
         } else {
@@ -71,12 +71,12 @@ class Default : ScaffoldRotation("Default") {
             val offsetSign = if (mod < 45.0f) 1.0f else -1.0f
             serverYaw + MathHelper.wrapAngleTo180_float((currentYaw - 135.0f * offsetSign) - serverYaw)
         }
-        
+
         if (!canRotate) {
             yaw = quantize(diagonalYaw)
             if (pitch == 0.0f) pitch = quantize(85.0f)
         }
-        
+
         currentTargetPlace?.let { targetPlace ->
             findBestHitVec(targetPlace.blockPos, targetPlace.enumFacing, serverYaw)?.let {
                 yaw = it.yaw
@@ -84,7 +84,7 @@ class Default : ScaffoldRotation("Default") {
                 canRotate = true
             }
         }
-        
+
         return Rotation(yaw, pitch)
     }
 
@@ -122,9 +122,12 @@ class Default : ScaffoldRotation("Default") {
         val eyeHeight = player.getEyeHeight()
         val reach = mc.playerController.blockReachDistance.toDouble()
 
-        val xOffsets = if (facing == EnumFacing.EAST) doubleArrayOf(1.0) else if (facing == EnumFacing.WEST) doubleArrayOf(0.0) else PLACE_OFFSETS
-        val yOffsets = if (facing == EnumFacing.UP) doubleArrayOf(1.0) else if (facing == EnumFacing.DOWN) doubleArrayOf(0.0) else PLACE_OFFSETS
-        val zOffsets = if (facing == EnumFacing.SOUTH) doubleArrayOf(1.0) else if (facing == EnumFacing.NORTH) doubleArrayOf(0.0) else PLACE_OFFSETS
+        val xOffsets =
+            if (facing == EnumFacing.EAST) doubleArrayOf(1.0) else if (facing == EnumFacing.WEST) doubleArrayOf(0.0) else PLACE_OFFSETS
+        val yOffsets =
+            if (facing == EnumFacing.UP) doubleArrayOf(1.0) else if (facing == EnumFacing.DOWN) doubleArrayOf(0.0) else PLACE_OFFSETS
+        val zOffsets =
+            if (facing == EnumFacing.SOUTH) doubleArrayOf(1.0) else if (facing == EnumFacing.NORTH) doubleArrayOf(0.0) else PLACE_OFFSETS
 
         var bestYaw = -180.0f
         var bestPitch = 0.0f
@@ -140,11 +143,12 @@ class Default : ScaffoldRotation("Default") {
 
                     val rotations = getRotationsTo(relX, relY, relZ, baseYaw, pitch)
                     val mop = player.rayTraceWithCustomRotation(reach, rotations[0], rotations[1])
-                    
-                    if (mop != null && 
+
+                    if (mop != null &&
                         mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK &&
-                        mop.blockPos == blockPos && mop.sideHit == facing) {
-                        
+                        mop.blockPos == blockPos && mop.sideHit == facing
+                    ) {
+
                         val totalDiff = abs(rotations[0] - baseYaw) + abs(rotations[1] - pitch)
                         if ((bestYaw == -180.0f && bestPitch == 0.0f) || totalDiff < bestDiff) {
                             bestYaw = rotations[0]
@@ -159,7 +163,13 @@ class Default : ScaffoldRotation("Default") {
         return if (bestYaw != -180.0f || bestPitch != 0.0f) Rotation(bestYaw, bestPitch) else null
     }
 
-    private fun getRotationsTo(targetX: Double, targetY: Double, targetZ: Double, currentYaw: Float, currentPitch: Float): FloatArray {
+    private fun getRotationsTo(
+        targetX: Double,
+        targetY: Double,
+        targetZ: Double,
+        currentYaw: Float,
+        currentPitch: Float
+    ): FloatArray {
         val horizontalDistance = sqrt(targetX * targetX + targetZ * targetZ)
         val yawDelta = MathHelper.wrapAngleTo180_float(
             (atan2(targetZ, targetX) * 180.0 / Math.PI).toFloat() - 90.0f - currentYaw
