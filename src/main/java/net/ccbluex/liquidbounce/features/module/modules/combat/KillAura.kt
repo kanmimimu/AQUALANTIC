@@ -130,7 +130,22 @@ object KillAura : Module() {
     // AutoBlock
     private val text11 = TitleValue("AutoBlock")
     private val autoBlockValue: ListValue = object :
-        ListValue("Auto-Block", arrayOf("Vanilla", "WatchDogBlink", "WatchDogBlinkLess", "BlocksMC", "Fake", "UNCP", "UNCP2", "PreC08", "Grim", "None"), "None") {
+        ListValue(
+            "Auto-Block",
+            arrayOf(
+                "Vanilla",
+                "WatchDogBlink",
+                "WatchDogBlinkLess",
+                "BlocksMC",
+                "Fake",
+                "UNCP",
+                "UNCP2",
+                "PreC08",
+                "Grim",
+                "None"
+            ),
+            "None"
+        ) {
         override fun onChanged(oldValue: String, newValue: String) {
             BlinkUtils.setBlinkState(off = true, release = true)
             blinking = false
@@ -381,6 +396,7 @@ object KillAura : Module() {
                         }
                     }
                 }
+
                 "blocksmc" -> {
                     if (!canBlock) {
                         if (blinking) {
@@ -400,6 +416,7 @@ object KillAura : Module() {
                             BlinkUtils.setBlinkState(packetMoving = true)
                             blinking = true
                         }
+
                         2 -> {
                             val bestSword = InventoryUtils.findSword()
                             if (bestSword != -1 && bestSword != mc.thePlayer.inventory.currentItem) {
@@ -410,6 +427,7 @@ object KillAura : Module() {
                             }
                             runAttackLoop(true)
                         }
+
                         3 -> {
                             if (swapped && originalSlot != -1) {
                                 mc.thePlayer.inventory.currentItem = originalSlot
@@ -423,6 +441,7 @@ object KillAura : Module() {
                         }
                     }
                 }
+
                 "uncp" -> {
                     if (this.blocking) {
                         mc.netHandler.addToSendQueue(C09PacketHeldItemChange((mc.thePlayer.inventory.currentItem + 1) % 9))
@@ -431,12 +450,14 @@ object KillAura : Module() {
                     }
                     runAttackLoop(false)
                 }
+
                 "uncp2" -> {
                     isBlocksmcAutoblocking = false
                     stopBlocking()
                     runAttackLoop(false)
                     startBlocking()
                 }
+
                 "prec08" -> {
                     if (canBlock) {
                         mc.netHandler.addToSendQueue(C08PacketPlayerBlockPlacement(mc.thePlayer.inventory.getCurrentItem()))
@@ -444,6 +465,7 @@ object KillAura : Module() {
                     }
                     runAttackLoop(false)
                 }
+
                 "grim" -> {
                     if (clicks > 0) {
                         stopBlocking()
@@ -543,7 +565,8 @@ object KillAura : Module() {
         currentTarget ?: return
         if (hitable) {
             if (!targetModeValue.equals("Multi")) {
-                attackEntity(if (raycastValue.get()) {
+                attackEntity(
+                    if (raycastValue.get()) {
                     (RaycastUtils.raycastEntity(maxRange.toDouble()) {
                         it is EntityLivingBase && it !is EntityArmorStand && (!raycastTargetValue.get() || EntityUtils.canRayCast(
                             it
