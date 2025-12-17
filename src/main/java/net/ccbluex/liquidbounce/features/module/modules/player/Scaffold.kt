@@ -39,7 +39,7 @@ object Scaffold : Module() {
 
     private val rotationsValue = ListValue(
         "Rotations",
-        arrayOf("Normal", "Stabilized", "WatchDog", "WatchDog2", "Telly", "Spin", "None"),
+        arrayOf("Default", "Normal", "Stabilized", "WatchDog", "WatchDog2", "Telly", "Spin", "None"),
         "Normal"
     ).displayable { !bridgeMode.equals("GodBridge") }
     private val towerHorizontalValue = ListValue(
@@ -242,6 +242,7 @@ object Scaffold : Module() {
     // Rotation modes
     private val rotationModes: Map<String, ScaffoldRotation> by lazy {
         mapOf(
+            "Default" to Default(),
             "Normal" to Normal(),
             "Stabilized" to Stabilized(),
             "Spin" to Spin(),
@@ -601,6 +602,7 @@ object Scaffold : Module() {
         }
         if (InventoryUtils.findAutoBlockBlock(highBlock.get()) != -1) {
             findBlock(expandLengthValue.get() > 1 && !towerStatus)
+            currentRotationMode?.setTargetPlace(targetPlace)
             if (towerStatus) {
                 move()
             }
@@ -703,10 +705,12 @@ object Scaffold : Module() {
         val rotation = currentRotationMode?.getRotation(lockRotation, defaultPitch)
 
         if (rotation != null) {
-            RotationUtils.setTargetRotationReverse(
-                RotationUtils.limitAngleChange(RotationUtils.serverRotation, rotation, rotationSpeed),
-                1, 0
-            )
+            val finalRotation = if (rotationsValue.equals("Default")) {
+                rotation
+            } else {
+                RotationUtils.limitAngleChange(RotationUtils.serverRotation, rotation, rotationSpeed)
+            }
+            RotationUtils.setTargetRotationReverse(finalRotation, 1, 0)
         }
         
         handleRotationDelayCountdown()
@@ -817,7 +821,6 @@ object Scaffold : Module() {
             else -> false
         }
     }
-
     /**
      * Search for new target block
      */
