@@ -171,6 +171,8 @@ object Scaffold : Module() {
     private val searchValue = BoolValue("Search", true)
     private val downValue = BoolValue("Downward", false)
     private val safeWalkValue = BoolValue("SafeWalk", false)
+    private val jumpFacingForward = BoolValue("JumpFacingForward", false).displayable { !rotationsValue.equals("None") }
+    private val jumpFacingForwardTicks = IntegerValue("JumpFacingForwardTicks", 5, 1, 10).displayable { jumpFacingForward.get() && jumpFacingForward.displayable }
     private val zitterModeValue = BoolValue("Zitter", false)
     private val rotationSpeedValue = BoolValue("RotationSpeed", true)
     private val maxRotationSpeedValue: IntegerValue = object : IntegerValue("MaxRotationSpeed", 180, 0, 180) {
@@ -338,6 +340,12 @@ object Scaffold : Module() {
     // cancel sprint
     private var cancelSprint = false
 
+    // Jump Facing Forward
+    private var rotateForward = false
+    private var rotatingForward = false
+    private var rotationDelay = 0
+    private var wasOnGround = false
+
     // Zitter Smooth
     private var zitterDirection = false
 
@@ -381,6 +389,9 @@ object Scaffold : Module() {
     override fun onEnable() {
         started = false
         prevTowered = false
+        rotateForward = false
+        rotatingForward = false
+        rotationDelay = 0
         rotationModes.values.forEach { it.onEnable() }
         towerModes.values.forEach { it.onEnable() }
         bridgeModes.values.forEach { it.onEnable() }
@@ -599,6 +610,7 @@ object Scaffold : Module() {
 
     @EventTarget
     fun onJump(event: JumpEvent) {
+        rotateForward(true)
         if (MovementUtils.isMoving() && jumpBoost.get() && sprintModeValue.equals("WatchDog") && GameSettings.isKeyDown(
                 mc.gameSettings.keyBindUseItem
             )
@@ -671,6 +683,19 @@ object Scaffold : Module() {
                 RotationUtils.limitAngleChange(RotationUtils.serverRotation, godRotation, rotationSpeed),
                 1, 0
             )
+            handleRotationDelayCountdown()
+            return
+        }
+
+        // Jump facing forward override
+        if (rotateForward && jumpFacingForward.get() && !rotationsValue.equals("None")) {
+            val forwardYaw = mc.thePlayer.rotationYaw - ScaffoldMisc.hardcodedYaw() - 180
+            val forwardRotation = Rotation(forwardYaw, 90F)
+            RotationUtils.setTargetRotationReverse(
+                RotationUtils.limitAngleChange(RotationUtils.serverRotation, forwardRotation, rotationSpeed),
+                1, 0
+            )
+            handleRotationDelayCountdown()
             return
         }
 
@@ -682,6 +707,33 @@ object Scaffold : Module() {
                 RotationUtils.limitAngleChange(RotationUtils.serverRotation, rotation, rotationSpeed),
                 1, 0
             )
+        }
+        
+        handleRotationDelayCountdown()
+    }
+
+    private fun handleRotationDelayCountdown() {
+        if (rotationDelay > 0) {
+            rotationDelay--
+            if (rotationDelay == 0) {
+                rotateForward = false
+                rotatingForward = false
+            }
+        }
+    }
+
+    private fun rotateForward(delay: Boolean) {
+        if (jumpFacingForward.get() && !rotationsValue.equals("None")) {
+            // Disable during active tower modes except Timer/AdvancedTimer/None
+            if (towerStatus) {
+                val towerMode = if (MovementUtils.isMoving()) towerHorizontalValue.get() else towerVerticalValue.get()
+                if (!towerMode.equals("Timer", true) && !towerMode.equals("AdvancedTimer", true) && !towerMode.equals("None", true)) {
+                    return
+                }
+            }
+            rotatingForward = true
+            rotateForward = true
+            rotationDelay = jumpFacingForwardTicks.get()
         }
     }
 
@@ -867,6 +919,8 @@ object Scaffold : Module() {
      * Place target block
      */
     private fun place() {
+        // Don't place blocks while facing forward during jump
+        if (rotateForward && jumpFacingForward.get()) return
         if (targetPlace == null || !shouldPlace()) return
         if (!rotationsValue.equals("None")) {
             val rayTraceInfo = mc.thePlayer.rayTraceWithServerSideRotation(5.0)
