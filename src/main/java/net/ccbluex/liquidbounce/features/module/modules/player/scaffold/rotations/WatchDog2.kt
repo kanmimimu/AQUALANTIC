@@ -7,15 +7,18 @@ import net.minecraft.util.MathHelper
 import kotlin.math.sign
 
 class WatchDog2 : ScaffoldRotation("WatchDog2") {
-    private var offsetYaw = 0f
-    private var offsetYawAngle = 126.425f
-    private var offsetMinPitch = 76f
-    private var offsetFirstStroke = 0L
-    private var offsetSet2 = false
-    private var offsetWas451 = false
-    private var offsetWas452 = false
-    private var offsetSwitchVl = 0
-    private var offsetTheYaw = 0f
+    private var yaw = 0f
+    private var yawAngle = 126.425f
+    private var minPitch = 76f
+    private var minOffset = 11
+    private var firstStroke = 0L
+    private var set2 = false
+    private var was451 = false
+    private var was452 = false
+    private var switchvl = 0
+    private var theYaw = 0f
+    private var yawOffset = 5f
+    private var dynamic = 0
 
     override fun getRotation(lockRotation: Rotation?, defaultPitch: Float): Rotation {
         val moveAngle = ScaffoldMisc.getMovementAngle().toFloat()
@@ -23,7 +26,7 @@ class WatchDog2 : ScaffoldRotation("WatchDog2") {
         val normalizedYaw = (relativeYaw % 360 + 360) % 360
         val quad = normalizedYaw % 90
 
-        val side = MathHelper.wrapAngleTo180_float(ScaffoldMisc.getMotionYaw() - offsetYaw)
+        val side = MathHelper.wrapAngleTo180_float(ScaffoldMisc.getMotionYaw() - yaw)
         val yawBackwards = MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw) - ScaffoldMisc.hardcodedYaw()
         val blockYawOffset = if (lockRotation != null) {
             MathHelper.wrapAngleTo180_float(yawBackwards - lockRotation.yaw)
@@ -32,93 +35,146 @@ class WatchDog2 : ScaffoldRotation("WatchDog2") {
         val strokeDelay = 250L
         val first = 76f
         val sec = 78f
-        var minOffset = 11
 
         when {
             quad <= 5 || quad >= 85 -> {
-                offsetYawAngle = 126.425f; minOffset = 11; offsetMinPitch = first
+                yawAngle = 126.425f; minOffset = 11; minPitch = first
             }
-
             quad > 5 && quad <= 15 || quad >= 75 && quad < 85 -> {
-                offsetYawAngle = 127.825f; minOffset = 9; offsetMinPitch = first
+                yawAngle = 127.825f; minOffset = 9; minPitch = first
             }
-
             quad > 15 && quad <= 25 || quad >= 65 && quad < 75 -> {
-                offsetYawAngle = 129.625f; minOffset = 8; offsetMinPitch = first
+                yawAngle = 129.625f; minOffset = 8; minPitch = first
             }
-
             quad > 25 && quad <= 32 || quad >= 58 && quad < 65 -> {
-                offsetYawAngle = 130.485f; minOffset = 7; offsetMinPitch = sec
+                yawAngle = 130.485f; minOffset = 7; minPitch = sec
             }
-
             quad > 32 && quad <= 38 || quad >= 52 && quad < 58 -> {
-                offsetYawAngle = 133.485f; minOffset = 6; offsetMinPitch = sec
+                yawAngle = 133.485f; minOffset = 6; minPitch = sec
             }
-
             quad > 38 && quad <= 42 || quad >= 48 && quad < 52 -> {
-                offsetYawAngle = 135.625f; minOffset = 4; offsetMinPitch = sec
+                yawAngle = 135.625f; minOffset = 4; minPitch = sec
             }
-
             quad > 42 && quad <= 45 || quad >= 45 && quad < 48 -> {
-                offsetYawAngle = 137.625f; minOffset = 3; offsetMinPitch = sec
+                yawAngle = 137.625f; minOffset = 3; minPitch = sec
             }
         }
 
-        val offset = offsetYawAngle
+        val offset = yawAngle
 
-        if (offsetSwitchVl > 0) {
-            offsetFirstStroke = System.currentTimeMillis()
-            offsetSwitchVl = 0
+        if (switchvl > 0) {
+            firstStroke = System.currentTimeMillis()
+            switchvl = 0
         }
-        if (offsetFirstStroke > 0 && (System.currentTimeMillis() - offsetFirstStroke) > strokeDelay) {
-            offsetFirstStroke = 0
+        if (firstStroke > 0 && (System.currentTimeMillis() - firstStroke) > strokeDelay) {
+            firstStroke = 0
         }
 
-        val usePitch =
-            if (lockRotation != null && lockRotation.pitch >= offsetMinPitch) lockRotation.pitch else offsetMinPitch
+        val usePitch = if (lockRotation != null && lockRotation.pitch >= minPitch) {
+            lockRotation.pitch
+        } else {
+            minPitch
+        }
+
+        dynamic = if (lockRotation != null) 1 else 2
+        yawOffset = blockYawOffset
 
         if (!MovementUtils.isMoving() || MovementUtils.getSpeed() <= 0.001) {
-            return Rotation(offsetTheYaw, usePitch)
+            return Rotation(theYaw, usePitch)
         }
 
         val motionYaw = ScaffoldMisc.getMotionYaw()
-        val newYaw = motionYaw - offset * sign(MathHelper.wrapAngleTo180_float(motionYaw - offsetYaw))
-        offsetYaw = MathHelper.wrapAngleTo180_float(newYaw)
+        val newYaw = motionYaw - offset * sign(MathHelper.wrapAngleTo180_float(motionYaw - yaw))
+        yaw = MathHelper.wrapAngleTo180_float(newYaw)
 
-        if (quad > 3 && quad < 87) {
+        if (quad > 3 && quad < 87 && dynamic > 0) {
             if (quad < 45f) {
-                if (offsetFirstStroke == 0L) offsetSet2 = side < 0
-                if (offsetWas452) offsetSwitchVl++
-                offsetWas451 = true
-                offsetWas452 = false
+                if (firstStroke == 0L) {
+                    set2 = side < 0
+                }
+                if (was452) switchvl++
+                was451 = true
+                was452 = false
             } else {
-                if (offsetFirstStroke == 0L) offsetSet2 = side >= 0
-                if (offsetWas451) offsetSwitchVl++
-                offsetWas452 = true
-                offsetWas451 = false
+                if (firstStroke == 0L) {
+                    set2 = side >= 0
+                }
+                if (was451) switchvl++
+                was452 = true
+                was451 = false
             }
         }
 
-        if (!ScaffoldMisc.isDiagonal(mc.thePlayer.rotationYaw)) 9 else 15
-        val calcOffset = blockYawOffset.coerceIn(-minOffset.toFloat(), minOffset.toFloat())
+        val minSwitch = if (!ScaffoldMisc.isDiagonal(mc.thePlayer.rotationYaw)) 9f else 15f
 
-        offsetTheYaw = if (offsetSet2) {
-            (offsetYaw + offset * 2) - calcOffset
+        if (side >= 0) {
+            if (yawOffset <= -minSwitch && firstStroke == 0L && dynamic > 0) {
+                if (quad <= 3 || quad >= 87) {
+                    if (set2) switchvl++
+                    set2 = false
+                }
+            } else if (yawOffset >= 0 && firstStroke == 0L && dynamic > 0) {
+                if (quad <= 3 || quad >= 87) {
+                    if (yawOffset >= minSwitch) {
+                        if (!set2) switchvl++
+                        set2 = true
+                    }
+                }
+            }
+            if (set2) {
+                var clampedOffset = yawOffset
+                if (clampedOffset < 0) clampedOffset = 0f
+                if (clampedOffset > minOffset) clampedOffset = minOffset.toFloat()
+                theYaw = (yaw + offset * 2) - clampedOffset
+                return Rotation(theYaw, usePitch)
+            }
         } else {
-            offsetYaw - calcOffset
+            if (yawOffset >= minSwitch && firstStroke == 0L && dynamic > 0) {
+                if (quad <= 3 || quad >= 87) {
+                    if (set2) switchvl++
+                    set2 = false
+                }
+            } else if (yawOffset <= 0 && firstStroke == 0L && dynamic > 0) {
+                if (quad <= 3 || quad >= 87) {
+                    if (yawOffset <= -minSwitch) {
+                        if (!set2) switchvl++
+                        set2 = true
+                    }
+                }
+            }
+            if (set2) {
+                var clampedOffset = yawOffset
+                if (clampedOffset > 0) clampedOffset = 0f
+                if (clampedOffset < -minOffset) clampedOffset = -minOffset.toFloat()
+                theYaw = (yaw - offset * 2) - clampedOffset
+                return Rotation(theYaw, usePitch)
+            }
         }
-        return Rotation(offsetTheYaw, usePitch)
+
+        var clampedOffset = yawOffset
+        if (side >= 0) {
+            if (clampedOffset > 0) clampedOffset = 0f
+            if (clampedOffset < -minOffset) clampedOffset = -minOffset.toFloat()
+        } else {
+            if (clampedOffset < 0) clampedOffset = 0f
+            if (clampedOffset > minOffset) clampedOffset = minOffset.toFloat()
+        }
+        theYaw = yaw - clampedOffset
+        return Rotation(theYaw, usePitch)
     }
 
     override fun onEnable() {
-        offsetYaw = 0f
-        offsetYawAngle = 126.425f
-        offsetMinPitch = 76f
-        offsetFirstStroke = 0L
-        offsetSet2 = false
-        offsetWas451 = false
-        offsetWas452 = false
-        offsetSwitchVl = 0
-        offsetTheYaw = 0f
+        yaw = 0f
+        yawAngle = 126.425f
+        minPitch = 76f
+        minOffset = 11
+        firstStroke = 0L
+        set2 = false
+        was451 = false
+        was452 = false
+        switchvl = 0
+        theYaw = 0f
+        yawOffset = 5f
+        dynamic = 0
     }
 }
