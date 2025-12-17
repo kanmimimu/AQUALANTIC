@@ -6,6 +6,7 @@ import net.ccbluex.liquidbounce.event.*
 import net.ccbluex.liquidbounce.features.module.Module
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.ModuleInfo
+import net.ccbluex.liquidbounce.features.module.modules.player.Blink
 import net.ccbluex.liquidbounce.features.module.modules.player.InvManager
 import net.ccbluex.liquidbounce.features.value.BoolValue
 import net.ccbluex.liquidbounce.features.value.FloatValue
@@ -108,6 +109,7 @@ object Stealer : Module() {
     private val AuraonlyOnGroundValue = BoolValue("OnlyOnGround", true).displayable { Aura.get() }
     private val AuranotOpenedValue = BoolValue("NotOpened", false).displayable { Aura.get() }
     private val AuranoCombatingValue = BoolValue("NoCombating", true).displayable { Aura.get() }
+    private val AuraBlinkCheckValue = BoolValue("BlinkCheck", false).displayable { Aura.get() }
 
     private var AuracurrentBlock: BlockPos? = null
     private var AuraunderClick = false
@@ -252,7 +254,7 @@ object Stealer : Module() {
     @EventTarget
     fun onMotion(event: MotionEvent) {
         if (Aura.get()){
-            if ((AuraonlyOnGroundValue.get() && !mc.thePlayer.onGround) || (AuranoCombatingValue.get() && CrossSine.combatManager.inCombat)) {
+            if ((AuraonlyOnGroundValue.get() && !mc.thePlayer.onGround) || (AuranoCombatingValue.get() && CrossSine.combatManager.inCombat) || (AuraBlinkCheckValue.get() && Blink.state)) {
                 return
             }
 
