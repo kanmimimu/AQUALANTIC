@@ -40,5 +40,8 @@ abstract class NoSlowMode(val modeName: String) : MinecraftInstance() {
     open fun onMove(event: MoveEvent) {}
     open val sprint: Boolean
         get() = true
-    open fun slow(): Float { return 0.2F}
+
+    open fun slow(): Float {
+        return 0.2F
+    }
 }

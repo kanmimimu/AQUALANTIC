@@ -18,7 +18,16 @@ class WatchDogNoSlow : NoSlowMode("WatchDog") {
     override fun onPreMotion(event: MotionEvent) {
         if (PlayerUtils.offGroundTicks == 4 && send) {
             send = false
-            sendPacketNoEvent(C08PacketPlayerBlockPlacement(BlockPos(-1,-1,-1), 255, mc.thePlayer.heldItem, 0F,0F,0F))
+            sendPacketNoEvent(
+                C08PacketPlayerBlockPlacement(
+                    BlockPos(-1, -1, -1),
+                    255,
+                    mc.thePlayer.heldItem,
+                    0F,
+                    0F,
+                    0F
+                )
+            )
         } else {
             if (mc.thePlayer.heldItem != null && mc.thePlayer.isUsingItem && !holdSword) {
                 event.y += 1E-14

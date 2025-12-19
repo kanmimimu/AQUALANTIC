@@ -31,9 +31,9 @@ public final class BlocksMCNoSlow extends NoSlowMode {
         if ((this.getHoldConsume() || this.getHoldBow()) && MinecraftInstance.mc.thePlayer.isUsingItem()) {
             this.tickCycle++;
             if (this.tickCycle == 1) {
-                PacketUtils.sendPacketNoEvent((Packet)(new C09PacketHeldItemChange((MinecraftInstance.mc.thePlayer.inventory.currentItem + 1) % 9)));
-                PacketUtils.sendPacketNoEvent((Packet)(new C09PacketHeldItemChange(MinecraftInstance.mc.thePlayer.inventory.currentItem)));
-                PacketUtils.sendPacketNoEvent((Packet)(new C08PacketPlayerBlockPlacement(new BlockPos(-1, -1, -1), 0, MinecraftInstance.mc.thePlayer.getHeldItem(), 0.0F, 0.0F, 0.0F)));
+                PacketUtils.sendPacketNoEvent((Packet) (new C09PacketHeldItemChange((MinecraftInstance.mc.thePlayer.inventory.currentItem + 1) % 9)));
+                PacketUtils.sendPacketNoEvent((Packet) (new C09PacketHeldItemChange(MinecraftInstance.mc.thePlayer.inventory.currentItem)));
+                PacketUtils.sendPacketNoEvent((Packet) (new C08PacketPlayerBlockPlacement(new BlockPos(-1, -1, -1), 0, MinecraftInstance.mc.thePlayer.getHeldItem(), 0.0F, 0.0F, 0.0F)));
             }
         } else {
             this.tickCycle = 0;

@@ -2,38 +2,38 @@ package net.ccbluex.liquidbounce.features.module.modules.movement.noslows.impl
 
 import net.ccbluex.liquidbounce.event.MotionEvent
 import net.ccbluex.liquidbounce.features.module.modules.movement.noslows.NoSlowMode
-import net.ccbluex.liquidbounce.features.value.BoolValue
 import net.ccbluex.liquidbounce.utils.PacketUtils
-import net.ccbluex.liquidbounce.utils.SpoofItemUtils
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.network.play.client.C09PacketHeldItemChange
 import net.minecraft.util.BlockPos
 
-class UpdatedNCPNoSlow : NoSlowMode("UpdatedNCP") {
-    private val swapPacket = BoolValue("${valuePrefix}SwapPacket", true)
-    private var swap = false
-    private var prevItem = 0
+class NCPNoSlow : NoSlowMode("NCP") {
+    private var tickCycle = 0
+
     override fun onPreMotion(event: MotionEvent) {
-        if (holdConsume || holdBow) {
-            if (swap) {
-                swapSlot()
+        if ((holdConsume || holdBow) && mc.thePlayer.isUsingItem) {
+            tickCycle++
+            if (tickCycle == 1) {
+                PacketUtils.sendPacketNoEvent(C09PacketHeldItemChange((mc.thePlayer.inventory.currentItem + 1) % 9))
+                PacketUtils.sendPacketNoEvent(C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem))
                 PacketUtils.sendPacketNoEvent(
                     C08PacketPlayerBlockPlacement(
-                        BlockPos.ORIGIN,
-                        255,
+                        BlockPos(-1, -1, -1),
+                        0,
                         mc.thePlayer.heldItem,
                         0f,
                         0f,
                         0f
                     )
                 )
-                swap = false
             }
+        } else {
+            tickCycle = 0
         }
     }
 
     override fun onPostMotion(event: MotionEvent) {
-        if (holdSword) {
+        if (holdSword && mc.thePlayer.isUsingItem) {
             PacketUtils.sendPacketNoEvent(
                 C08PacketPlayerBlockPlacement(
                     BlockPos.ORIGIN,
@@ -44,20 +44,6 @@ class UpdatedNCPNoSlow : NoSlowMode("UpdatedNCP") {
                     0f
                 )
             )
-        }
-    }
-
-    private fun swapSlot() {
-        if (swapPacket.get()) {
-            PacketUtils.sendPacketNoEvent(C09PacketHeldItemChange((mc.thePlayer.inventory.currentItem + 1) % 9))
-            PacketUtils.sendPacketNoEvent(C09PacketHeldItemChange(mc.thePlayer.inventory.currentItem))
-        } else {
-            prevItem = mc.thePlayer.inventory.currentItem
-            SpoofItemUtils.startSpoof(prevItem, false)
-            mc.thePlayer.inventory.currentItem = (mc.thePlayer.inventory.currentItem + 1) % 9
-            mc.thePlayer.inventory.currentItem = prevItem
-            SpoofItemUtils.stopSpoof()
-            prevItem = 0
         }
     }
 

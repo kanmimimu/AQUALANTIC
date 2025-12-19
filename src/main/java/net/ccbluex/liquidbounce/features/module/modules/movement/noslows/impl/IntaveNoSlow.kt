@@ -10,7 +10,13 @@ import net.minecraft.util.EnumFacing
 class IntaveNoSlow : NoSlowMode("Intave") {
     override fun onPreMotion(event: MotionEvent) {
         if (holdConsume) {
-            PacketUtils.sendPacketNoEvent(C07PacketPlayerDigging(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, BlockPos.ORIGIN, EnumFacing.UP))
+            PacketUtils.sendPacketNoEvent(
+                C07PacketPlayerDigging(
+                    C07PacketPlayerDigging.Action.RELEASE_USE_ITEM,
+                    BlockPos.ORIGIN,
+                    EnumFacing.UP
+                )
+            )
         }
     }
 
