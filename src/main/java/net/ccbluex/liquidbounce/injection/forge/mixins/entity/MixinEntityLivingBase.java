@@ -82,7 +82,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity {
     @Shadow
     protected abstract void updateAITick();
 
-
     @Shadow
     public float prevCameraPitch;
 
@@ -123,8 +122,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity {
     /**
      * @author CCBlueX
      * @author CoDynamic
-     * Modified by Co Dynamic
-     * Date: 2023/02/15
+     *         Modified by Co Dynamic
+     *         Date: 2023/02/15
      */
     @Overwrite
     protected void jump() {
@@ -136,7 +135,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity {
             }
             this.motionY = this.getJumpUpwardsMotion();
             if (this.isPotionActive(Potion.jump)) {
-                this.motionY += ((float)(this.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F);
+                this.motionY += ((float) (this.getActivePotionEffect(Potion.jump).getAmplifier() + 1) * 0.1F);
             }
 
             if (this.isSprinting() || event.getBoosting()) {
@@ -172,11 +171,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity {
      */
     @Overwrite
     private int getArmSwingAnimationEnd() {
-        int speed = this.isPotionActive(Potion.digSpeed) ? 6 - (1 + this.getActivePotionEffect(Potion.digSpeed).getAmplifier()) : (this.isPotionActive(Potion.digSlowdown) ? 6 + (1 + this.getActivePotionEffect(Potion.digSlowdown).getAmplifier()) * 2 : 6);
+        int speed = this.isPotionActive(Potion.digSpeed)
+                ? 6 - (1 + this.getActivePotionEffect(Potion.digSpeed).getAmplifier())
+                : (this.isPotionActive(Potion.digSlowdown)
+                        ? 6 + (1 + this.getActivePotionEffect(Potion.digSlowdown).getAmplifier()) * 2
+                        : 6);
 
         if (Animations.INSTANCE.getState()) {
             if (this.equals(Minecraft.getMinecraft().thePlayer)) {
-                speed = (int) (speed * Animations.INSTANCE.getSwingSpeedValue().get());
+                speed = (int) (speed * Animations.getEffectiveSwingSpeed());
             }
         }
 

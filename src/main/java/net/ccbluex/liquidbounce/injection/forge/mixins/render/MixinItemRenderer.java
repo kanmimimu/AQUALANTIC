@@ -47,8 +47,11 @@ public abstract class MixinItemRenderer {
 
     @Shadow
     protected abstract void rotateWithPlayerRotations(EntityPlayerSP entityPlayerSP, float partialTicks);
+
     @Shadow
-    public abstract void renderItem(EntityLivingBase entityIn, ItemStack heldStack, ItemCameraTransforms.TransformType transform);
+    public abstract void renderItem(EntityLivingBase entityIn, ItemStack heldStack,
+            ItemCameraTransforms.TransformType transform);
+
     @Shadow
     private ItemStack itemToRender;
 
@@ -56,7 +59,8 @@ public abstract class MixinItemRenderer {
     private RenderItem itemRenderer;
 
     @Shadow
-    protected abstract void renderItemMap(AbstractClientPlayer clientPlayer, float pitch, float equipmentProgress, float swingProgress);
+    protected abstract void renderItemMap(AbstractClientPlayer clientPlayer, float pitch, float equipmentProgress,
+            float swingProgress);
 
     @Shadow
     protected abstract boolean isBlockTranslucent(Block p_isBlockTranslucent_1_);
@@ -74,7 +78,8 @@ public abstract class MixinItemRenderer {
     protected abstract void doItemUsedTransformations(float swingProgress);
 
     @Shadow
-    protected abstract void renderPlayerArm(AbstractClientPlayer clientPlayer, float equipProgress, float swingProgress);
+    protected abstract void renderPlayerArm(AbstractClientPlayer clientPlayer, float equipProgress,
+            float swingProgress);
 
     private Animations animations;
 
@@ -85,7 +90,8 @@ public abstract class MixinItemRenderer {
         boolean flag = false;
         if (this.itemToRender != null && itemstack != null) {
             if (!this.itemToRender.getIsItemStackEqual(itemstack)) {
-                if (!this.itemToRender.getItem().shouldCauseReequipAnimation(this.itemToRender, itemstack, this.equippedItemSlot != SpoofItemUtils.INSTANCE.getSlot())) {
+                if (!this.itemToRender.getItem().shouldCauseReequipAnimation(this.itemToRender, itemstack,
+                        this.equippedItemSlot != SpoofItemUtils.INSTANCE.getSlot())) {
                     this.itemToRender = itemstack;
                     this.equippedItemSlot = SpoofItemUtils.INSTANCE.getSlot();
                     return;
@@ -93,7 +99,8 @@ public abstract class MixinItemRenderer {
 
                 flag = true;
             }
-        } else flag = this.itemToRender != null || itemstack != null;
+        } else
+            flag = this.itemToRender != null || itemstack != null;
 
         float f = 0.4F;
         float f1 = flag ? 0.0F : 1.0F;
@@ -105,6 +112,7 @@ public abstract class MixinItemRenderer {
         }
         i.cancel();
     }
+
     /**
      * @author Liuli
      */
@@ -136,11 +144,14 @@ public abstract class MixinItemRenderer {
         if (animations == null) {
             animations = CrossSine.moduleManager.getModule(Animations.class);
         }
-        float f = 1.0F - (this.prevEquippedProgress + (this.equippedProgress - this.prevEquippedProgress) * partialTicks);
+        float f = 1.0F
+                - (this.prevEquippedProgress + (this.equippedProgress - this.prevEquippedProgress) * partialTicks);
         EntityPlayerSP abstractclientplayer = mc.thePlayer;
         float f1 = abstractclientplayer.getSwingProgress(partialTicks);
-        float f2 = abstractclientplayer.prevRotationPitch + (abstractclientplayer.rotationPitch - abstractclientplayer.prevRotationPitch) * partialTicks;
-        float f3 = abstractclientplayer.prevRotationYaw + (abstractclientplayer.rotationYaw - abstractclientplayer.prevRotationYaw) * partialTicks;
+        float f2 = abstractclientplayer.prevRotationPitch
+                + (abstractclientplayer.rotationPitch - abstractclientplayer.prevRotationPitch) * partialTicks;
+        float f3 = abstractclientplayer.prevRotationYaw
+                + (abstractclientplayer.rotationYaw - abstractclientplayer.prevRotationYaw) * partialTicks;
         this.rotateArroundXAndY(f2, f3);
         this.setLightMapFromPlayer(abstractclientplayer);
         this.rotateWithPlayerRotations(abstractclientplayer, partialTicks);
@@ -148,13 +159,17 @@ public abstract class MixinItemRenderer {
         GlStateManager.pushMatrix();
 
         if (this.itemToRender != null) {
-            if (animations.getOldAnimations().get() && (itemToRender.getItem() instanceof ItemCarrotOnAStick || itemToRender.getItem() instanceof ItemFishingRod)) {
+            if (animations.getOldAnimations().get() && (itemToRender.getItem() instanceof ItemCarrotOnAStick
+                    || itemToRender.getItem() instanceof ItemFishingRod)) {
                 GlStateManager.translate(0.08F, -0.027F, -0.33F);
                 GlStateManager.scale(0.93F, 1.0F, 1.0F);
             }
             if (itemToRender.getItem() instanceof ItemMap) {
                 this.renderItemMap(abstractclientplayer, f2, f, f1);
-            } else if ((abstractclientplayer.isUsingItem() || ((itemToRender.getItem() instanceof ItemSword) && ((KillAura.INSTANCE.getState() && KillAura.INSTANCE.getDisplayBlocking() && KillAura.INSTANCE.getCurrentTarget() != null))))) {
+            } else if ((abstractclientplayer.isUsingItem() || Animations.isFakeBlockActive()
+                    || ((itemToRender.getItem() instanceof ItemSword)
+                            && ((KillAura.INSTANCE.getState() && KillAura.INSTANCE.getDisplayBlocking()
+                                    && KillAura.INSTANCE.getCurrentTarget() != null))))) {
                 switch (this.itemToRender.getItemUseAction()) {
                     case NONE:
                         this.transformFirstPersonItem(f, 0.0F);
@@ -257,8 +272,11 @@ public abstract class MixinItemRenderer {
                                 }
                                 case "Swong": {
                                     transformFirstPersonItem(f / 2.0F, 0.0F);
-                                    GlStateManager.rotate(-MathHelper.sin(MathHelper.sqrt_float(f1) * 3.1415927F) * 40.0F / 2.0F, MathHelper.sqrt_float(f1) / 2.0F, -0.0F, 9.0F);
-                                    GlStateManager.rotate(-MathHelper.sqrt_float(f1) * 30.0F, 1.0F, MathHelper.sqrt_float(f1) / 2.0F, -0.0F);
+                                    GlStateManager.rotate(
+                                            -MathHelper.sin(MathHelper.sqrt_float(f1) * 3.1415927F) * 40.0F / 2.0F,
+                                            MathHelper.sqrt_float(f1) / 2.0F, -0.0F, 9.0F);
+                                    GlStateManager.rotate(-MathHelper.sqrt_float(f1) * 30.0F, 1.0F,
+                                            MathHelper.sqrt_float(f1) / 2.0F, -0.0F);
                                     doBlockTransformations();
                                     break;
                                 }
@@ -267,7 +285,7 @@ public abstract class MixinItemRenderer {
                                     doBlockTransformations();
                                     break;
                                 }
-                                case "Swank":{
+                                case "Swank": {
                                     GL11.glTranslated(-0.1, 0.15, 0.0);
                                     this.transformFirstPersonItem(f / 0.15f, f1);
                                     final float rot = MathHelper.sin(MathHelper.sqrt_float(f1) * 3.1415927f);
@@ -276,10 +294,13 @@ public abstract class MixinItemRenderer {
                                     this.doBlockTransformations();
                                     break;
                                 }
-                                case "Jello":{
+                                case "Jello": {
                                     this.transformFirstPersonItem(0.0f, 0.0f);
                                     this.doBlockTransformations();
-                                    final int alpha = (int)Math.min(255L, ((System.currentTimeMillis() % 255L > 127L) ? Math.abs(Math.abs(System.currentTimeMillis()) % 255L - 255L) : (System.currentTimeMillis() % 255L)) * 2L);
+                                    final int alpha = (int) Math.min(255L,
+                                            ((System.currentTimeMillis() % 255L > 127L)
+                                                    ? Math.abs(Math.abs(System.currentTimeMillis()) % 255L - 255L)
+                                                    : (System.currentTimeMillis() % 255L)) * 2L);
                                     GlStateManager.translate(0.3f, -0.0f, 0.4f);
                                     GlStateManager.rotate(0.0f, 0.0f, 0.0f, 1.0f);
                                     GlStateManager.translate(0.0f, 0.5f, 0.0f);
@@ -287,20 +308,22 @@ public abstract class MixinItemRenderer {
                                     GlStateManager.translate(0.6f, 0.5f, 0.0f);
                                     GlStateManager.rotate(-90.0f, 1.0f, 0.0f, -1.0f);
                                     GlStateManager.rotate(-10.0f, 1.0f, 0.0f, -1.0f);
-                                    GlStateManager.rotate(abstractclientplayer.isSwingInProgress ? (-alpha / 5.0f) : 1.0f, 1.0f, -0.0f, 1.0f);
+                                    GlStateManager.rotate(
+                                            abstractclientplayer.isSwingInProgress ? (-alpha / 5.0f) : 1.0f, 1.0f,
+                                            -0.0f, 1.0f);
                                     break;
                                 }
-                                case "HSlide":{
-                                    transformFirstPersonItem(f1!=0?Math.max(1-(f1*2),0)*0.7F:0, 1F);
+                                case "HSlide": {
+                                    transformFirstPersonItem(f1 != 0 ? Math.max(1 - (f1 * 2), 0) * 0.7F : 0, 1F);
                                     doBlockTransformations();
                                     break;
                                 }
-                                case "None":{
-                                    transformFirstPersonItem(0F,0F);
+                                case "None": {
+                                    transformFirstPersonItem(0F, 0F);
                                     doBlockTransformations();
                                     break;
                                 }
-                                case "Rotate":{
+                                case "Rotate": {
                                     rotateSword(f1);
                                     break;
                                 }
@@ -372,25 +395,28 @@ public abstract class MixinItemRenderer {
                                     break;
                                 }
                                 /*
-                                case "Moon": {
-                                    var9 = MathHelper.sin(MathHelper.sqrt_float(this.mc.thePlayer.getSwingProgress(partialTicks)) * 3.1415927F);
-                                    GL11.glTranslated(0.0D, 0.0D, 0.0D);
-                                    if (mm.blockAnimation.cancleE.getBoolean())
-                                        this.transformFirstPersonItem(0.0F, 0.0F);
-                                    else this.transformFirstPersonItem(f / 1.4f, 0.0f);
-                                    GlStateManager.rotate(-var9 * 65.0F / 2.0F, var9 / 2.0F, 1.0F, 4.0F);
-                                    GlStateManager.rotate(-var9 * 60.0F, 1.0F, var9 / 3.0F, -0.0F);
-                                    break;
-                                }
-                                case "Leaked": {
-                                    final float var = MathHelper.sin((float) (MathHelper.sqrt_float(f1) * Math.PI));
-                                    if (mm.blockAnimation.cancleE.getBoolean())
-                                        transformFirstPersonItem(0.0F, 0.0f);
-                                    else transformFirstPersonItem(f / 1.4F, 0.0f);
-                                    GlStateManager.rotate(-var * 41F, 1.1F, 0.8F, -0.3F);
-                                    break;
-                                }
-                                */
+                                 * case "Moon": {
+                                 * var9 =
+                                 * MathHelper.sin(MathHelper.sqrt_float(this.mc.thePlayer.getSwingProgress(
+                                 * partialTicks)) * 3.1415927F);
+                                 * GL11.glTranslated(0.0D, 0.0D, 0.0D);
+                                 * if (mm.blockAnimation.cancleE.getBoolean())
+                                 * this.transformFirstPersonItem(0.0F, 0.0F);
+                                 * else this.transformFirstPersonItem(f / 1.4f, 0.0f);
+                                 * GlStateManager.rotate(-var9 * 65.0F / 2.0F, var9 / 2.0F, 1.0F, 4.0F);
+                                 * GlStateManager.rotate(-var9 * 60.0F, 1.0F, var9 / 3.0F, -0.0F);
+                                 * break;
+                                 * }
+                                 * case "Leaked": {
+                                 * final float var = MathHelper.sin((float) (MathHelper.sqrt_float(f1) *
+                                 * Math.PI));
+                                 * if (mm.blockAnimation.cancleE.getBoolean())
+                                 * transformFirstPersonItem(0.0F, 0.0f);
+                                 * else transformFirstPersonItem(f / 1.4F, 0.0f);
+                                 * GlStateManager.rotate(-var * 41F, 1.1F, 0.8F, -0.3F);
+                                 * break;
+                                 * }
+                                 */
                                 case "Grim": {
                                     float equipProgress = f;
                                     float swingProgress = MathHelper.sin(MathHelper.sqrt_float(f1) * 3.1415927F);
@@ -398,7 +424,8 @@ public abstract class MixinItemRenderer {
                                     doItemRenderGLScale();
                                     GlStateManager.translate(0.0F, equipProgress * -0.4F, 0.0F);
                                     GlStateManager.translate(0.0F, -0.15F, 0.0F); // Static downward offset.
-                                    GlStateManager.rotate(45.0F, 0.0F, 1.0F, 0.0F); // Standard Y-axis rotation for visibility.
+                                    GlStateManager.rotate(45.0F, 0.0F, 1.0F, 0.0F); // Standard Y-axis rotation for
+                                                                                    // visibility.
                                     GlStateManager.rotate(-18.0F, 1.0F, 0.0F, 0.0F); // Static downward tilt (X-axis).
                                     GlStateManager.rotate(-18.0F, 0.0F, 0.0F, 1.0F); // Static sideways tilt (Z-axis).
                                     GlStateManager.rotate(-swingProgress * 27.0F, 1.0F, 0.0F, 0.0F);
@@ -437,7 +464,8 @@ public abstract class MixinItemRenderer {
 
     private void doItemRenderGLTranslate() {
         if (animations.getState()) {
-            GlStateManager.translate(0.56F + animations.getItemPosXValue().get(), -0.52F + animations.getCustomItemPosY(), -0.71999997F + animations.getItemPosZValue().get());
+            GlStateManager.translate(0.56F + animations.getCustomItemPosX(),
+                    -0.52F + animations.getCustomItemPosY(), -0.71999997F + animations.getCustomItemPosZ());
         } else {
             GlStateManager.translate(0.56F, -0.52F, -0.71999997F);
         }
@@ -445,11 +473,14 @@ public abstract class MixinItemRenderer {
 
     private void doItemRenderGLScale() {
         if (animations.getState()) {
-            GlStateManager.scale(((float) Animations.INSTANCE.getItemScaleValue().get() / 100) * 0.4, ((float) Animations.INSTANCE.getItemScaleValue().get() / 100) * 0.4, ((float) Animations.INSTANCE.getItemScaleValue().get() / 100) * 0.4);
+            GlStateManager.scale(((float) Animations.INSTANCE.getItemScaleValue().get() / 100) * 0.4,
+                    ((float) Animations.INSTANCE.getItemScaleValue().get() / 100) * 0.4,
+                    ((float) Animations.INSTANCE.getItemScaleValue().get() / 100) * 0.4);
         } else {
             GlStateManager.scale(0.4, 0.4, 0.4);
         }
     }
+
     private void sigmaOld(float f) {
         doItemRenderGLTranslate();
         GlStateManager.translate(0.0F, f * -0.6F, 0.0F);
@@ -460,7 +491,7 @@ public abstract class MixinItemRenderer {
         doItemRenderGLScale();
     }
 
-    //methods in LiquidBounce b73 Animation-No-Cross
+    // methods in LiquidBounce b73 Animation-No-Cross
     private void avatar(float swingProgress) {
         doItemRenderGLTranslate();
         GlStateManager.translate(0.0F, 0.0F, 0.0F);
@@ -485,7 +516,7 @@ public abstract class MixinItemRenderer {
         doItemRenderGLScale();
     }
 
-    private void rotateSword(float f1){
+    private void rotateSword(float f1) {
         genCustom();
         doBlockTransformations();
         GlStateManager.translate(-0.5F, 0.2F, 0.0F);
@@ -503,7 +534,6 @@ public abstract class MixinItemRenderer {
         GlStateManager.rotate(var4 * -68.6F, 1.3F, 0.1F, 0.2F);
         GlStateManager.scale(0.4F, 0.4F, 0.4F);
     }
-
 
     private void jello(float var12) {
         doItemRenderGLTranslate();
@@ -561,7 +591,7 @@ public abstract class MixinItemRenderer {
         final NoRender NoRender = CrossSine.moduleManager.getModule(NoRender.class);
 
         if (NoRender.getState() && NoRender.getFireEffect().get()) {
-            //vanilla's method
+            // vanilla's method
             GlStateManager.color(1.0F, 1.0F, 1.0F, 0.9F);
             GlStateManager.depthFunc(519);
             GlStateManager.depthMask(false);

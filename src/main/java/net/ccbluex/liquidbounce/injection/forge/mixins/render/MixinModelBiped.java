@@ -1,4 +1,3 @@
- 
 package net.ccbluex.liquidbounce.injection.forge.mixins.render;
 
 import net.ccbluex.liquidbounce.features.module.modules.visual.Animations;
@@ -27,13 +26,28 @@ public class MixinModelBiped {
     @Shadow
     public ModelRenderer bipedHead;
 
-    @Inject(method = "setRotationAngles", at = @At(value = "FIELD", target = "Lnet/minecraft/client/model/ModelBiped;swingProgress:F"))
-    private void revertSwordAnimation(float p_setRotationAngles_1_, float p_setRotationAngles_2_, float p_setRotationAngles_3_, float p_setRotationAngles_4_, float p_setRotationAngles_5_, float p_setRotationAngles_6_, Entity p_setRotationAngles_7_, CallbackInfo callbackInfo) {
-        if(heldItemRight == 3 && Animations.INSTANCE.getOldAnimations().get()) // Modified
-            this.bipedRightArm.rotateAngleY = 0F;
+    @Inject(method = "setRotationAngles", at = @At("HEAD"))
+    private void onSetRotationAnglesHead(float p1, float p2, float p3, float p4, float p5, float p6, Entity entity,
+            CallbackInfo ci) {
+        if (entity instanceof EntityPlayer && entity.equals(Minecraft.getMinecraft().thePlayer)) {
+            if (heldItemRight != 0 && heldItemRight != 3 && Animations.isBlockingForRender()) {
+                this.heldItemRight = 3;
+            }
+        }
+    }
 
-        if (RotationUtils.serverRotation != null && p_setRotationAngles_7_ instanceof EntityPlayer && p_setRotationAngles_7_.equals(Minecraft.getMinecraft().thePlayer)) {
-            this.bipedHead.rotateAngleX = (float) Math.toRadians(RenderUtils.interpolate(RotationUtils.headPitch, RotationUtils.prevHeadPitch, Minecraft.getMinecraft().timer.renderPartialTicks));
+    @Inject(method = "setRotationAngles", at = @At(value = "FIELD", target = "Lnet/minecraft/client/model/ModelBiped;swingProgress:F"))
+    private void revertSwordAnimation(float p1, float p2, float p3, float p4, float p5, float p6, Entity entity,
+            CallbackInfo ci) {
+        if (heldItemRight == 3 && Animations.INSTANCE.getOldAnimations().get()) {
+            this.bipedRightArm.rotateAngleY = 0F;
+        }
+
+        if (RotationUtils.serverRotation != null && entity instanceof EntityPlayer
+                && entity.equals(Minecraft.getMinecraft().thePlayer)) {
+            float partialTicks = Minecraft.getMinecraft().timer.renderPartialTicks;
+            this.bipedHead.rotateAngleX = (float) Math.toRadians(
+                    RenderUtils.interpolate(RotationUtils.headPitch, RotationUtils.prevHeadPitch, partialTicks));
         }
     }
 }
