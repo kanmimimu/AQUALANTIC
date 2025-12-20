@@ -114,9 +114,10 @@ object Animations : Module() {
             if (mc.gameSettings.keyBindUseItem.isKeyDown && mc.objectMouseOver?.blockPos != null) {
                 mc.playerController.resetBlockRemoving()
             }
-            if (mc.gameSettings.keyBindUseItem.isKeyDown && 
-                mc.gameSettings.keyBindAttack.isKeyDown && 
-                mc.objectMouseOver?.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
+            if (mc.gameSettings.keyBindUseItem.isKeyDown &&
+                mc.gameSettings.keyBindAttack.isKeyDown &&
+                mc.objectMouseOver?.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK
+            ) {
                 PlayerUtils.swing()
             }
         }
